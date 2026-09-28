@@ -154,6 +154,26 @@ ul.tips strong{color:var(--ink)}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + 84px + env(safe-area-inset-bottom,0px));z-index:9;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:500;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.25)}
 @media (max-width:380px){.stats{grid-template-columns:1fr 1fr}.set{grid-template-columns:34px 1fr 12px 1fr 44px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.set.tm{grid-template-columns:42px 1fr 48px 48px}
+.tick.go{color:var(--accent);font-size:16px}
+.check{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.check li{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.check li:first-child{border-top:0}
+.check li.on span{color:var(--muted);text-decoration:line-through}
+.check .box{width:40px;height:40px;min-height:40px;padding:0;border-radius:8px;color:var(--muted)}
+.check .box[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#fff}
+.check .go{min-height:36px;padding:4px 10px;font-size:14px;color:var(--accent)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.meter.kcal i{background:var(--ink-2)}
+.meter.kcal.over i{background:var(--warn)}
+.custom{display:grid;grid-template-columns:1fr 72px 72px 48px;gap:6px}
+.custom button{padding:0}
+.deload{border-color:color-mix(in srgb,var(--good) 45%,var(--line))}
+.deload .label{color:var(--good)}
+button.inline{min-height:0;padding:0 4px;display:inline;font-size:inherit}
+.timer.hold{background:var(--accent);color:var(--accent-ink)}
+.timer.hold button{color:var(--accent-ink);border-color:color-mix(in srgb,var(--accent-ink) 40%,transparent)}
+@media (max-width:380px){.duo{grid-template-columns:1fr}.custom{grid-template-columns:1fr 60px 60px 44px}}
 </style>
 </head>
 <body>
@@ -175,7 +195,7 @@ ul.tips strong{color:var(--ink)}
   <button type="button" data-tab="train"><svg viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>Training</button>
   <button type="button" data-tab="progress"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 16l4-5 4 3 6-8"/></svg>Voortgang</button>
   <button type="button" data-tab="food"><svg viewBox="0 0 24 24"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M17 3c-2 2-2 6 0 8v10"/></svg>Voeding</button>
-  <button type="button" data-tab="more"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>Back-up</button>
+  <button type="button" data-tab="more"><svg viewBox="0 0 24 24"><path stroke-width="4" d="M5 12h.01M12 12h.01M19 12h.01"/></svg>Meer</button>
 </div></nav>
 
 <div class="toast" id="toast" hidden></div>
@@ -186,7 +206,7 @@ const KEY='krachthuis.v1';
 const EX={
   bss:{name:'Bulgaarse split squat',kind:'db',sets:3,min:8,max:12,rest:90,side:true,cues:['Achterste voet op een stoel of bank, dumbbell in elke hand.','Zak recht naar beneden tot je achterste knie bijna de grond raakt.','Duw op door je voorste hiel; knie volgt de richting van je tenen.']},
   ohp:{name:'Overhead press',kind:'bar',sets:3,min:6,max:10,rest:120,cues:['Stang op schouderhoogte, handen net buiten de schouders.','Billen en buik aanspannen, geen holle rug.','Druk recht omhoog; hoofd even naar achter, daarna onder de stang door.']},
-  pullup:{name:'Pull-ups',kind:'bw',sets:3,min:5,max:12,rest:120,cues:['Bovenhandse greep, iets breder dan de schouders.','Trek je borst naar de stang, schouderbladen naar beneden.','Lukt nog geen 5? Doe negatieven: spring omhoog en zak in 5 tellen.']},
+  pullup:{name:'Pull-ups',kind:'bw',sets:3,min:5,max:12,rest:120,cues:['Bovenhandse greep, iets breder dan de schouders.','Trek je borst naar de stang, schouderbladen naar beneden.','Lukt nog geen 5? Wissel naar negatieve pull-ups.']},
   bbrow:{name:'Voorovergebogen roeien',kind:'bar',sets:3,min:8,max:12,rest:90,cues:['Heupen naar achter, rug recht, bovenlichaam ongeveer 45°.','Trek de stang naar je navel, ellebogen langs je lichaam.','Gecontroleerd laten zakken, niet zwaaien.']},
   pushup:{name:'Push-ups',kind:'bw',sets:3,min:8,max:20,rest:60,cues:['Handen iets breder dan de schouders, lichaam één rechte lijn.','Borst bijna tot de grond, ellebogen ongeveer 45° van je lichaam.','Te makkelijk? Voeten op een stoel.']},
   plank:{name:'Plank',kind:'time',sets:3,min:30,max:60,rest:60,cues:['Op onderarmen, ellebogen onder de schouders.','Billen aanspannen en navel naar binnen.','Stop zodra je heupen gaan zakken.']},
@@ -200,31 +220,42 @@ const EX={
   goblet:{name:'Goblet squat (3 tellen omlaag)',kind:'db',sets:3,min:12,max:20,rest:90,cues:['Eén dumbbell rechtop tegen je borst.','Zak in 3 tellen zo diep als je netjes kunt.','Ellebogen tussen je knieën, borst omhoog.']},
   pike:{name:'Pike push-ups',kind:'bw',sets:3,min:6,max:12,rest:90,cues:['Handen op de grond, heupen hoog: omgekeerde V.','Laat je hoofd tussen je handen richting de grond zakken.','Zwaarder: voeten op een stoel.']},
   lat:{name:'Zijwaarts heffen',kind:'db',sets:3,min:12,max:20,rest:60,cues:['Lichte dumbbells, armen licht gebogen.','Hef zijwaarts tot schouderhoogte, niet hoger.','Langzaam zakken, niet zwaaien.']},
-  curl:{name:'Biceps curl',kind:'bar',sets:3,min:8,max:12,rest:60,cues:['Stang op schouderbreedte, onderhandse greep.','Ellebogen blijven naast je lichaam.','Twee tellen omlaag.']}
+  curl:{name:'Biceps curl',kind:'bar',sets:3,min:8,max:12,rest:60,cues:['Stang op schouderbreedte, onderhandse greep.','Ellebogen blijven naast je lichaam.','Twee tellen omlaag.']},
+  stepup:{name:'Step-ups',kind:'db',sets:3,min:8,max:12,rest:90,side:true,cues:['Stevige stoel of traptree, dumbbell in elke hand.','Zet je hele voet neer en duw op door die hiel.','Gecontroleerd terug naar beneden.']},
+  revlunge:{name:'Achterwaartse lunges',kind:'db',sets:3,min:8,max:12,rest:90,side:true,cues:['Stap naar achteren in plaats van naar voren.','Voorste knie blijft boven je voet.','Vaak prettiger voor de knieën.']},
+  dbpress:{name:'Schouderdrukken met dumbbells',kind:'db',sets:3,min:8,max:12,rest:90,cues:['Zittend of staand, dumbbells op schouderhoogte.','Druk omhoog tot je armen bijna gestrekt zijn.','Geen holle rug.']},
+  negpull:{name:'Negatieve pull-ups',kind:'bw',sets:3,min:3,max:6,rest:120,cues:['Spring of stap omhoog tot je kin boven de stang is.','Zak in 5 tellen tot gestrekte armen.','Lukt 3 × 6? Probeer weer gewone pull-ups.']},
+  invrow:{name:'Tafelroeien',kind:'bw',sets:3,min:8,max:15,rest:90,cues:['Lig onder een stevige tafel en pak de rand vast.','Lichaam recht, trek je borst naar de tafel.','Zwaarder: voeten verder naar voren.']},
+  dbfloor:{name:'Floor press met dumbbells',kind:'db',sets:3,min:8,max:12,rest:90,cues:['Liggend op de grond, dumbbells boven je borst.','Zak tot je bovenarmen de grond raken.','Druk samen omhoog.']},
+  sideplank:{name:'Zijplank',kind:'time',sets:3,min:20,max:45,rest:45,side:true,cues:['Op één onderarm, elleboog onder je schouder.','Heupen omhoog, lichaam één lijn.','Eerst de ene kant, dan de andere.']},
+  deadbug:{name:'Dead bug',kind:'bw',sets:3,min:8,max:12,rest:60,side:true,cues:['Op je rug, armen omhoog, knieën 90°.','Strek tegelijk een arm en het andere been uit.','Onderrug blijft tegen de grond.']},
+  dbrdl:{name:'Roemeense deadlift met dumbbells',kind:'db',sets:3,min:10,max:15,rest:90,cues:['Dumbbells voor je bovenbenen.','Heupen naar achter, rug recht.','Omhoog door je heupen naar voren te duwen.']},
+  glute:{name:'Bilbrug op één been',kind:'bw',sets:3,min:8,max:15,rest:60,side:true,cues:['Op je rug, één voet plat, ander been gestrekt.','Duw je heupen omhoog tot je lichaam recht is.','Bovenaan 1 tel knijpen.']},
+  reardelt:{name:'Achterste schouder heffen',kind:'db',sets:3,min:12,max:20,rest:60,cues:['Voorovergebogen, lichte dumbbells.','Armen zijwaarts omhoog, ellebogen licht gebogen.','Schouderbladen naar elkaar.']},
+  dbcurl:{name:'Hamer curl',kind:'db',sets:3,min:10,max:15,rest:60,cues:['Dumbbells met duimen naar boven.','Ellebogen naast je lichaam.','Twee tellen omlaag.']}
 };
+const ALT={bss:['revlunge','stepup','goblet'],ohp:['dbpress','pike'],pullup:['negpull','chinup','invrow'],bbrow:['dbrow','invrow'],pushup:['dbfloor','floor'],plank:['sideplank','deadbug'],rdl:['dbrdl','glute'],floor:['dbfloor','pushup'],chinup:['negpull','pullup','invrow'],dbrow:['bbrow','invrow'],lunge:['revlunge','stepup'],knee:['deadbug','plank'],dl:['rdl','dbrdl'],goblet:['bss','stepup'],pike:['dbpress','ohp'],lat:['reardelt','dbpress'],curl:['dbcurl','chinup']};
 const WO={
   A:{focus:'Benen, schouders en rug',ex:['bss','ohp','pullup','bbrow','pushup','plank']},
   B:{focus:'Achterkant benen, borst en rug',ex:['rdl','floor','chinup','dbrow','lunge','knee']},
   C:{focus:'Deadlift, schouders en armen',ex:['dl','goblet','pike','pullup','lat','curl']}
 };
+const WARM=[['Op de plaats lopen of touwtje springen',60],['10 armcirkels voor- en achteruit',0],['10 squats zonder gewicht',0],['10 heupscharnieren zonder gewicht',0],['Hangen aan de stang',20],['1–2 lichte sets van de eerste oefening',0]];
+const COOL=[['Hamstrings rekken, per been',30],['Heupbuiger rekken (knielend), per kant',30],['Borst rekken in een deurpost',30],['Lats rekken: hangen of voorover aan tafel',30],['Kuiten rekken tegen de muur, per been',30]];
 const FOODS=[
-  ['Magere kwark 250 g',22],['3 eieren',19],['Kipfilet 150 g',34],['Tonijn, 1 blik',28],['Mager gehakt 125 g',26],['Zalm 125 g',25],
-  ['Skyr 150 g',16],['Eiwitshake',24],['Melk 250 ml',9],['2 sneetjes volkoren',9],['Kikkererwten 200 g',15],['Pindakaas 2 el',7]
+  ['Magere kwark 250 g',22,145],['3 eieren',19,225],['Kipfilet 150 g',34,165],['Tonijn, 1 blik',28,130],['Mager gehakt 125 g',26,200],['Zalm 125 g',25,250],
+  ['Skyr 150 g',16,95],['Eiwitshake',24,120],['Melk 250 ml',9,115],['2 sneetjes volkoren',9,170],['Kikkererwten 200 g',15,240],['Pindakaas 2 el',7,180],
+  ['Havermout 60 g',7,225],['Rijst 200 g gekookt',5,260],['Aardappelen 250 g',5,200],['Banaan',1,110],['Handje noten',5,160]
 ];
+const ACT=[[1.2,'Zittend werk, weinig beweging'],[1.375,'Licht actief'],[1.55,'Matig actief (3× per week sporten)'],[1.725,'Zeer actief']];
 
 let S=load();
-let tab='train';
-let pickWo=null;
-let confirmKey=null;
-let chartEx=null;
-let timer={end:0,iv:null,label:''};
-let storageOk=true;
+let tab='train',pickWo=null,confirmKey=null,chartEx=null,swapOpen=null,restorePending=null,storageOk=true;
+let timer={mode:null,end:0,iv:null,onDone:null};
 
-function def(){return{v:1,settings:{bw:null,maxBar:50,maxDb:15,barInc:2.5,dbInc:2},sessions:[],draft:null,protein:{},weights:[],lastBackup:null}}
-function load(){
-  try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);return Object.assign(def(),d,{settings:Object.assign(def().settings,d.settings||{})})}}catch(e){}
-  return def();
-}
+function def(){return{v:1,settings:{bw:null,maxBar:50,maxDb:15,barInc:2.5,dbInc:2,sex:'m',age:null,height:null,act:1.55},sessions:[],draft:null,protein:{},weights:[],lastBackup:null,swaps:{},deload:{until:null,lastEnd:null,snooze:null}}}
+function normalize(d){const b=def();return Object.assign(b,d,{settings:Object.assign(b.settings,d.settings||{}),swaps:Object.assign({},d.swaps||{}),deload:Object.assign(b.deload,d.deload||{})})}
+function load(){try{const raw=localStorage.getItem(KEY);if(raw)return normalize(JSON.parse(raw))}catch(e){}return def()}
 function save(){
   try{localStorage.setItem(KEY,JSON.stringify(S));storageOk=true}catch(e){storageOk=false}
   if(!save.p&&navigator.storage&&navigator.storage.persist){save.p=1;navigator.storage.persist().catch(()=>{})}
@@ -232,65 +263,98 @@ function save(){
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=n=>(Math.round(n*10)/10).toString().replace('.',',');
+const num=v=>{const x=parseFloat(String(v??'').replace(',','.'));return isFinite(x)?x:null};
 const todayKey=()=>dkey(new Date());
 function dkey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
-function dnice(k){const d=new Date(k+'T12:00:00');return d.toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'})}
+function addDays(k,n){const d=new Date(k+'T12:00:00');d.setDate(d.getDate()+n);return dkey(d)}
+function dnice(k){return new Date(k+'T12:00:00').toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'})}
 function weekStart(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
-function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2800)}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,3200)}
 function daysSince(ts){return ts?Math.floor((Date.now()-ts)/864e5):null}
 function hasData(){return S.sessions.length||S.weights.length||Object.keys(S.protein).length}
+function restTxt(s){return s>=120?(s%60?fmt(s/60):s/60)+' min':s+' s'}
+function isWeighted(id){const k=EX[id].kind;return k==='bar'||k==='db'}
 
+function isDeload(){return !!(S.deload.until&&todayKey()<=S.deload.until)}
+function deloadDue(){
+  if(isDeload())return false;
+  const t=todayKey();if(S.deload.snooze&&t<S.deload.snooze)return false;
+  const from=S.deload.lastEnd||(S.sessions[0]&&S.sessions[0].date);if(!from)return false;
+  const n=S.sessions.filter(s=>!s.deload&&s.date>from).length;
+  return (new Date(t)-new Date(from))/864e5>=42&&n>=15;
+}
+function startDeload(){const t=todayKey();S.deload.until=addDays(t,6);S.deload.lastEnd=S.deload.until;S.deload.snooze=null;save()}
 
-function lastSets(id,beforeTs){
-  for(let i=S.sessions.length-1;i>=0;i--){const s=S.sessions[i];if(beforeTs&&s.ts>=beforeTs)continue;const e=s.entries.find(x=>x.ex===id);if(e&&e.sets.length)return e.sets}
+function lastSets(id,skipId){
+  for(let i=S.sessions.length-1;i>=0;i--){const s=S.sessions[i];if(s.deload||s.id===skipId)continue;const e=s.entries.find(x=>x.ex===id);if(e&&e.sets.length)return e.sets}
   return null;
 }
-function score(id,sets){const k=EX[id].kind;if(k==='bar'||k==='db')return Math.max(...sets.map(s=>(+s.w||0)*(1+(+s.r||0)/30)));return Math.max(...sets.map(s=>+s.r||0))}
+function score(id,sets){if(isWeighted(id))return Math.max(...sets.map(s=>(+s.w||0)*(1+(+s.r||0)/30)));return Math.max(...sets.map(s=>+s.r||0))}
+function roundTo(v,inc){return Math.max(inc,Math.round(v/inc)*inc)}
 function suggest(id){
-  const e=EX[id],L=lastSets(id),unit=e.kind==='time'?' s':'';
-  if(e.kind==='bar'||e.kind==='db'){
-    if(!L)return{w:'',r:e.min,text:`Eerste keer: kies een gewicht waarmee je ${e.min}–${e.max} herhalingen haalt en er nog 1–2 over hebt.`};
-    const w=+L[0].w||0,top=L.length>=e.sets&&L.every(s=>+s.r>=e.max);
-    const inc=e.kind==='bar'?S.settings.barInc:S.settings.dbInc,cap=e.kind==='bar'?S.settings.maxBar:S.settings.maxDb;
-    if(top){const nw=Math.round((w+inc)*100)/100;
-      if(nw>cap)return{w,r:e.max,text:`Je zit aan je zwaarste ${e.kind==='bar'?'stang':'dumbbells'}. Maak het zwaarder door 3 tellen te zakken of een set toe te voegen.`};
-      return{w:nw,r:e.min,text:`Alle sets op ${e.max} gehaald. Gewicht omhoog naar ${fmt(nw)} kg, begin weer op ${e.min}.`,up:true}}
-    const low=Math.min(...L.map(s=>+s.r||0)),r=Math.min(e.max,low+1);
-    return{w,r,text:`Zelfde gewicht (${fmt(w)} kg). Probeer ${r} herhalingen in elke set.`};
+  const e=EX[id],L=lastSets(id),unit=e.kind==='time'?' s':'',wt=isWeighted(id);
+  const inc=e.kind==='bar'?S.settings.barInc:S.settings.dbInc,cap=e.kind==='bar'?S.settings.maxBar:S.settings.maxDb;
+  if(isDeload()){
+    if(!L)return{w:'',r:e.min,sets:2,text:'Rustweek: 2 rustige sets, niet tot het uiterste.'};
+    const w=wt?roundTo((+L[0].w||0)*0.9,inc):'',r=Math.min(...L.map(s=>+s.r||0));
+    return{w,r,sets:2,text:`Rustweek: 2 sets${wt?`, ~10% lichter (${fmt(w)} kg)`:''}. Stop ruim voordat het zwaar wordt.`};
   }
-  if(!L)return{w:'',r:e.min,text:e.kind==='time'?`Houd ${e.min}–${e.max} seconden vol met goede houding.`:`Zoveel mogelijk nette herhalingen, stop met 1–2 over. Doel: ${e.min}–${e.max}.`};
+  if(wt){
+    if(!L)return{w:'',r:e.min,sets:e.sets,text:`Eerste keer: kies een gewicht waarmee je ${e.min}–${e.max} herhalingen haalt en er nog 1–2 over hebt.`};
+    const w=+L[0].w||0,top=L.length>=e.sets&&L.every(s=>+s.r>=e.max);
+    if(top){const nw=Math.round((w+inc)*100)/100;
+      if(nw>cap)return{w,r:e.max,sets:e.sets,text:`Je zit aan je zwaarste ${e.kind==='bar'?'stang':'dumbbells'}. Maak het zwaarder door 3 tellen te zakken of een set toe te voegen.`};
+      return{w:nw,r:e.min,sets:e.sets,text:`Alle sets op ${e.max} gehaald. Gewicht omhoog naar ${fmt(nw)} kg, begin weer op ${e.min}.`}}
+    const low=Math.min(...L.map(s=>+s.r||0)),r=Math.min(e.max,low+1);
+    return{w,r,sets:e.sets,text:`Zelfde gewicht (${fmt(w)} kg). Probeer ${r} herhalingen in elke set.`};
+  }
+  if(!L)return{w:'',r:e.min,sets:e.sets,text:e.kind==='time'?`Houd ${e.min}–${e.max} seconden vol met goede houding.`:`Zoveel mogelijk nette herhalingen, stop met 1–2 over. Doel: ${e.min}–${e.max}.`};
   const low=Math.min(...L.map(s=>+s.r||0)),step=e.kind==='time'?5:1;
-  if(L.length>=e.sets&&L.every(s=>+s.r>=e.max))return{w:'',r:e.max,text:e.kind==='time'?'Doel gehaald. Til één voet op of zet je ellebogen verder naar voren.':'Doel gehaald. Maak het zwaarder: rugzak met gewicht of 3 tellen zakken.'};
+  if(L.length>=e.sets&&L.every(s=>+s.r>=e.max))return{w:'',r:e.max,sets:e.sets,text:e.kind==='time'?'Doel gehaald. Maak het zwaarder: til één voet op of zet je ellebogen verder naar voren.':'Doel gehaald. Maak het zwaarder: rugzak met gewicht of 3 tellen zakken.'};
   const r=Math.min(e.max,low+step);
-  return{w:'',r,text:`Vorige keer minimaal ${low}${unit}. Doel: ${r}${unit} in elke set.`};
+  return{w:'',r,sets:e.sets,text:`Vorige keer minimaal ${low}${unit}. Doel: ${r}${unit} in elke set.`};
 }
-function setsText(id,sets){const e=EX[id];if(!sets||!sets.length)return'';
-  if(e.kind==='bar'||e.kind==='db'){const ws=[...new Set(sets.map(s=>fmt(+s.w||0)))];return sets.map(s=>s.r).join(' / ')+' × '+ws.join('/')+' kg'}
-  return sets.map(s=>s.r).join(' / ')+(e.kind==='time'?' s':' herh.')}
+function setsText(id,sets){if(!sets||!sets.length)return'';
+  if(isWeighted(id)){const ws=[...new Set(sets.map(s=>fmt(+s.w||0)))];return sets.map(s=>s.r).join(' / ')+' × '+ws.join('/')+' kg'}
+  return sets.map(s=>s.r).join(' / ')+(EX[id].kind==='time'?' s':' herh.')}
+function planIds(w){return WO[w].ex.map(id=>S.swaps[id]||id)}
 function nextWo(){const l=S.sessions[S.sessions.length-1];if(!l)return'A';return{A:'B',B:'C',C:'A'}[l.workout]||'A'}
 function thisWeekCount(){const ws=weekStart(new Date()).getTime();return S.sessions.filter(s=>s.ts>=ws).length}
+function freshRows(id){const sg=suggest(id);return Array.from({length:sg.sets},()=>({w:sg.w,r:sg.r,done:false}))}
 
+function kcalTarget(){const st=S.settings;if(!st.bw||!st.age||!st.height)return null;
+  const bmr=10*st.bw+6.25*st.height-5*st.age+(st.sex==='v'?-161:5);return Math.round(bmr*st.act/10)*10}
+function proteinTarget(){const bw=S.settings.bw;return bw?{lo:Math.round(bw*1.6),hi:Math.round(bw*2.2),t:Math.round(bw*1.8)}:null}
 
 function backupBanner(){
   const d=daysSince(S.lastBackup);
-  if(!S.sessions.length)return'';
-  if(d!==null&&d<7)return'';
+  if(!S.sessions.length||(d!==null&&d<7))return'';
   return`<div class="banner"><div><strong>${d===null?'Nog geen back-up':'Laatste back-up '+d+' dagen geleden'}</strong><div class="small">Maak er een, dan ben je je trainingen niet kwijt als je browsergegevens wist.</div></div><button type="button" class="primary" data-act="backup">Back-up maken</button></div>`;
+}
+function deloadCard(){
+  if(isDeload())return`<section class="card deload"><div class="row between"><div><span class="label">Rustweek</span><h3>Tot en met ${dnice(S.deload.until)}</h3></div><button type="button" class="ghost" data-act="deload-stop">Stoppen</button></div><p class="small">Deze week train je met 2 sets en ongeveer 10% minder gewicht. Zo herstellen je spieren en gewrichten, en ga je daarna sterker verder. Rustweektrainingen tellen niet mee voor je records.</p></section>`;
+  if(deloadDue())return`<section class="card deload"><span class="label">Voorstel</span><h3>Tijd voor een rustweek</h3><p class="small">Je traint al 6 weken of langer zonder rustweek. Een week lichter trainen helpt om daarna weer vooruit te gaan.</p><div class="row"><button type="button" class="primary" data-act="deload-start">Start rustweek</button><button type="button" data-act="deload-snooze">Nog een week door</button></div></section>`;
+  return'';
+}
+function checklist(list,key,title,sub){
+  const D=S.draft,st=D[key]||{};const done=list.filter((_,i)=>st[i]).length;
+  return`<section class="card"><div class="row between"><h3>${title}</h3><span class="num small muted">${done}/${list.length}</span></div><p class="small muted">${sub}</p>
+  <ul class="check">${list.map((it,i)=>`<li class="${st[i]?'on':''}"><button type="button" class="box" data-act="chk" data-k="${key}" data-i="${i}" aria-pressed="${!!st[i]}" aria-label="${esc(it[0])} klaar">✓</button><span>${esc(it[0])}</span>${it[1]?`<button type="button" class="go" data-act="chktimer" data-k="${key}" data-i="${i}">▶ ${it[1]} s</button>`:''}</li>`).join('')}</ul></section>`;
 }
 function vTrain(){
   if(S.draft)return vSession();
-  const w=pickWo||nextWo(),W=WO[w],n=thisWeekCount();
-  const list=W.ex.map(id=>{const e=EX[id],sg=suggest(id);
-    const tgt=(e.kind==='bar'||e.kind==='db')?`${e.sets} × ${e.min}–${e.max}${sg.w!==''?' · '+fmt(sg.w)+' kg':''}`:`${e.sets} × ${e.min}–${e.max}${e.kind==='time'?' s':''}`;
-    return`<li><span class="t">${esc(e.name)}${e.side?' <span class="muted small">per kant</span>':''}</span><span class="s num">${tgt}</span></li>`}).join('');
-  return`${backupBanner()}
+  const w=pickWo||nextWo(),W=WO[w],n=thisWeekCount(),dl=isDeload();
+  const list=planIds(w).map((id,ix)=>{const e=EX[id],sg=suggest(id),sw=id!==W.ex[ix];
+    const tgt=`${sg.sets} × ${e.min}–${e.max}${e.kind==='time'?' s':''}${isWeighted(id)&&sg.w!==''?' · '+fmt(sg.w)+' kg':''}`;
+    return`<li><span class="t">${esc(e.name)}${e.side?' <span class="muted small">per kant</span>':''}${sw?' <span class="tag">gewisseld</span>':''}</span><span class="s num">${tgt}</span></li>`}).join('');
+  return`${backupBanner()}${deloadCard()}
   <section class="card">
     <div class="row" style="gap:16px;flex-wrap:nowrap">
       <div class="plate ${w}" aria-hidden="true">${w}</div>
       <div class="stack" style="gap:4px">
-        <span class="label">${w===nextWo()?'Volgende training':'Gekozen training'}</span>
+        <span class="label">${w===nextWo()?'Volgende training':'Gekozen training'}${dl?' · rustweek':''}</span>
         <h2>Training ${w}</h2>
-        <span class="muted">${W.focus} · ± 45 min</span>
+        <span class="muted">${W.focus} · ± ${dl?30:45} min</span>
       </div>
     </div>
     <div class="seg" role="group" aria-label="Kies training">${['A','B','C'].map(x=>`<button type="button" data-act="pick" data-w="${x}" aria-pressed="${x===w}">${x}</button>`).join('')}</div>
@@ -303,45 +367,61 @@ function vTrain(){
     <p class="small muted">Train om de dag, bijvoorbeeld maandag, woensdag en vrijdag. A, B en C wisselen elkaar automatisch af.</p>
   </section>
   <section class="card">
-    <h3>Voor je begint</h3>
+    <h3>Hoeveel rust?</h3>
     <ul class="tips">
-      <li><strong>Warming-up:</strong> 5 minuten bewegen, daarna 1–2 lichte sets van de eerste oefening.</li>
+      <li><strong>Tussen sets van dezelfde oefening:</strong> zware oefeningen (deadlift, press, pull-ups) 2–2,5 min, lichtere oefeningen 60–90 s, core zoals de plank 45–60 s.</li>
+      <li><strong>Tussen twee oefeningen:</strong> ongeveer 1,5–2 minuten, de tijd om je spullen klaar te zetten.</li>
+      <li><strong>Plank 3 × 30 s:</strong> 30 seconden vasthouden, 45–60 seconden rust, en dat drie keer. Dus niet achter elkaar.</li>
+      <li>De timer start vanzelf als je een set afvinkt, en telt ook de tijd tussen oefeningen af.</li>
+    </ul>
+  </section>
+  <section class="card">
+    <h3>Goed om te weten</h3>
+    <ul class="tips">
       <li><strong>Hoe zwaar?</strong> Eindig elke set met 1–2 herhalingen over. Techniek gaat voor gewicht.</li>
       <li><strong>Vooruitgang:</strong> haal je bij alle sets het bovenste getal, dan gaat het gewicht omhoog. De app rekent het voor je uit.</li>
-      <li><strong>Rustweek:</strong> neem elke 6–8 weken een week met de helft van de sets.</li>
+      <li><strong>Doet iets pijn?</strong> Tik tijdens de training op "Wissel" voor een alternatief.</li>
+      <li><strong>Rustweek:</strong> na ongeveer 6 weken stelt de app er zelf een voor.${dl?'':' <button type="button" class="ghost small inline" data-act="deload-start">Nu starten</button>'}</li>
     </ul>
   </section>`;
 }
 function vSession(){
-  const D=S.draft,W=WO[D.workout];
-  const cards=W.ex.map(id=>{const e=EX[id],sg=suggest(id),L=lastSets(id),rows=D.entries[id]||[];
-    const wt=e.kind==='bar'||e.kind==='db';
-    const sets=rows.map((s,i)=>`<div class="set ${wt?'':'bw'} ${s.done?'done':''}">
+  const D=S.draft,ed=!!D.editId;
+  const cards=D.slots.map((sl,ix)=>{const id=sl.cur,e=EX[id],sg=suggest(id),L=lastSets(id,D.editId),rows=D.entries[id]||[];
+    const wt=isWeighted(id),tm=e.kind==='time';
+    const sets=rows.map((s,i)=>`<div class="set ${wt?'':tm?'tm':'bw'} ${s.done?'done':''}">
       <span class="n">${i+1}</span>
       ${wt?`<span class="unit"><input id="w-${id}-${i}" inputmode="decimal" aria-label="Gewicht set ${i+1}" data-f="w" data-ex="${id}" data-i="${i}" value="${s.w}"><em>kg</em></span><span class="x">×</span>`:''}
-      <span class="unit"><input id="r-${id}-${i}" inputmode="numeric" aria-label="${e.kind==='time'?'Seconden':'Herhalingen'} set ${i+1}" data-f="r" data-ex="${id}" data-i="${i}" value="${s.r}"><em>${e.kind==='time'?'s':'x'}</em></span>
+      <span class="unit"><input id="r-${id}-${i}" inputmode="numeric" aria-label="${tm?'Seconden':'Herhalingen'} set ${i+1}" data-f="r" data-ex="${id}" data-i="${i}" value="${s.r}"><em>${tm?'s':'x'}</em></span>
+      ${tm?`<button type="button" class="tick go" data-act="hold" data-ex="${id}" data-i="${i}" aria-label="Start timer set ${i+1}">▶</button>`:''}
       <button type="button" class="tick" data-act="tick" data-ex="${id}" data-i="${i}" aria-pressed="${!!s.done}" aria-label="Set ${i+1} klaar">✓</button>
     </div>`).join('');
-    return`<section class="card ex">
-      <div class="ex-head"><h3>${esc(e.name)}</h3><span class="tag num">${e.sets} × ${e.min}–${e.max}${e.kind==='time'?' s':''}${e.side?' p/k':''}</span></div>
-      <div class="hint">${esc(sg.text)}${L?`<div class="small muted">Vorige keer: ${esc(setsText(id,L))}</div>`:''}</div>
+    const opts=[sl.orig,...(ALT[sl.orig]||[])].filter(x=>x!==id&&!D.slots.some(o=>o.cur===x));
+    const swap=swapOpen===ix?`<div class="confirm"><b>Wissel ${esc(e.name)} voor:</b><div class="stack">${opts.map(x=>`<button type="button" data-act="swapto" data-slot="${ix}" data-to="${x}">${esc(EX[x].name)}${x===sl.orig?' (origineel)':''}</button>`).join('')}</div><span class="small muted">De keuze blijft staan voor volgende trainingen.</span><button type="button" class="ghost" data-act="swapclose">Annuleren</button></div>`:'';
+    return`<section class="card ex" id="ex-${id}">
+      <div class="ex-head"><h3>${esc(e.name)}</h3><span class="tag num">${e.sets} × ${e.min}–${e.max}${tm?' s':''}${e.side?' p/k':''}</span></div>
+      <div class="small muted">Rust tussen sets: ${restTxt(e.rest)}${tm?' · tik ▶ voor de timer':''}</div>
+      ${ed?'':`<div class="hint">${esc(sg.text)}${L?`<div class="small muted">Vorige keer: ${esc(setsText(id,L))}</div>`:''}</div>`}
       <div class="sets">${sets}</div>
+      ${swap}
       <div class="row between">
         <details><summary>Uitvoering</summary><ul>${e.cues.map(c=>`<li>${esc(c)}</li>`).join('')}<li><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(e.name+' uitvoering')}" target="_blank" rel="noopener">Bekijk een video</a></li></ul></details>
-        <button type="button" class="ghost" data-act="addset" data-ex="${id}">+ Set</button>
+        <span class="row" style="gap:0">${ed||!opts.length?'':`<button type="button" class="ghost" data-act="swap" data-slot="${ix}">Wissel</button>`}<button type="button" class="ghost" data-act="addset" data-ex="${id}">+ Set</button></span>
       </div>
     </section>`}).join('');
-  const done=Object.values(D.entries).flat().filter(s=>s.done).length,total=Object.values(D.entries).flat().length;
-  return`<section class="row between"><div><span class="label">Bezig</span><h2>Training ${D.workout}</h2></div><span class="num muted">${done}/${total} sets</span></section>
+  const all=Object.values(D.entries).flat(),done=all.filter(s=>s.done).length;
+  return`<section class="row between"><div><span class="label">${ed?'Bewerken · '+dnice(D.date):'Bezig'}${D.deload?' · rustweek':''}</span><h2>Training ${D.workout}</h2></div><span class="num muted">${done}/${all.length} sets</span></section>
+  ${ed?'<p class="small muted">Pas gewichten en herhalingen aan. Vink een set uit om hem te verwijderen.</p>':checklist(WARM,'warm','Warming-up','Ongeveer 5 minuten. Zo worden je spieren en gewrichten warm voor de eerste zware set.')}
   ${cards}
+  ${ed?'':checklist(COOL,'cool','Afkoelen en rekken','Rustig rekken, niet verend. Adem door.')}
   <section class="card">
     ${confirmKey==='discard'?`<div class="confirm"><b>Training weggooien?</b><span class="small muted">Wat je nu hebt ingevuld wordt niet bewaard.</span><div class="row"><button type="button" class="danger" data-act="discard-yes">Weggooien</button><button type="button" data-act="cancel">Terug</button></div></div>`:''}
-    <button type="button" class="primary block" data-act="finish">Training opslaan</button>
-    <button type="button" class="ghost" data-act="discard">Training weggooien</button>
+    <button type="button" class="primary block" data-act="finish">${ed?'Wijzigingen opslaan':'Training opslaan'}</button>
+    <button type="button" class="ghost" data-act="${ed?'discard-yes':'discard'}">${ed?'Annuleren':'Training weggooien'}</button>
   </section>`;
 }
 function chartSVG(pts,unit){
-  if(pts.length<2)return`<div class="empty">${pts.length?'Na je volgende training verschijnt hier een lijn.':'Nog geen gegevens.'}</div>`;
+  if(pts.length<2)return`<div class="empty">${pts.length?'Na je volgende meting verschijnt hier een lijn.':'Nog geen gegevens.'}</div>`;
   const W=600,H=220,pl=44,pr=16,pt=14,pb=28;
   const ys=pts.map(p=>p.y);let mn=Math.min(...ys),mx=Math.max(...ys);if(mn===mx){mn-=1;mx+=1}
   const pad=(mx-mn)*.15;mn=Math.max(0,mn-pad);mx+=pad;
@@ -353,7 +433,8 @@ function chartSVG(pts,unit){
   const area=d+` L${X(pts.length-1)} ${H-pb} L${pl} ${H-pb} Z`;
   const lab=[0,pts.length-1].map(i=>`<text class="ax" x="${X(i)}" y="${H-8}" text-anchor="${i?'end':'start'}">${esc(pts[i].x)}</text>`).join('');
   const dots=pts.map((p,i)=>`<circle class="pt ${i===pts.length-1?'last':''}" cx="${X(i)}" cy="${Y(p.y)}" r="${i===pts.length-1?5.5:4}"/>`).join('');
-  const hits=pts.map((p,i)=>`<rect class="hit" x="${X(i)-(W-pl-pr)/(pts.length-1)/2}" y="0" width="${(W-pl-pr)/(pts.length-1)}" height="${H}" data-tip="${esc(p.x)}: ${fmt(p.y)}${unit}" data-cx="${X(i)/W}" data-cy="${Y(p.y)/H}"/>`).join('');
+  const bw=(W-pl-pr)/(pts.length-1);
+  const hits=pts.map((p,i)=>`<rect class="hit" x="${X(i)-bw/2}" y="0" width="${bw}" height="${H}" data-tip="${esc(p.x)}: ${fmt(p.y)}${unit}" data-cx="${X(i)/W}" data-cy="${Y(p.y)/H}"/>`).join('');
   return`<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Verloop">${g}<path class="ar" d="${area}"/><path class="ln" d="${d}"/>${dots}${lab}${hits}</svg><div class="tip" hidden></div></div>`;
 }
 function vProgress(){
@@ -362,12 +443,12 @@ function vProgress(){
   const now=new Date(),mStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
   const month=S.sessions.filter(s=>s.ts>=mStart).length;
   let chart='<div class="empty">Sla je eerste training op om hier je vooruitgang te zien.</div>',cap='';
-  if(chartEx){const e=EX[chartEx];const pts=S.sessions.filter(s=>s.entries.some(x=>x.ex===chartEx&&x.sets.length)).map(s=>({x:dnice(s.date),y:score(chartEx,s.entries.find(x=>x.ex===chartEx).sets)}));
-    const wt=e.kind==='bar'||e.kind==='db';cap=wt?'Geschat maximum voor 1 herhaling (kg), berekend uit je beste set.':e.kind==='time'?'Langste set (seconden).':'Meeste herhalingen in één set.';
+  if(chartEx){const e=EX[chartEx];const pts=S.sessions.filter(s=>!s.deload&&s.entries.some(x=>x.ex===chartEx&&x.sets.length)).map(s=>({x:dnice(s.date),y:score(chartEx,s.entries.find(x=>x.ex===chartEx).sets)}));
+    const wt=isWeighted(chartEx);cap=wt?'Geschat maximum voor 1 herhaling (kg), berekend uit je beste set. Rustweken tellen niet mee.':e.kind==='time'?'Langste set (seconden).':'Meeste herhalingen in één set.';
     chart=chartSVG(pts,wt?' kg':e.kind==='time'?' s':' herh.')}
   const bwPts=S.weights.slice(-30).map(w=>({x:dnice(w.date),y:w.kg}));
-  const hist=S.sessions.slice().reverse().slice(0,20).map(s=>`<li>
-    <div class="row between"><b>${dnice(s.date)} · Training ${s.workout}</b>${confirmKey==='del-'+s.id?`<span class="row"><button type="button" class="danger" data-act="del-yes" data-id="${s.id}">Verwijder</button><button type="button" data-act="cancel">Nee</button></span>`:`<button type="button" class="ghost small" data-act="del" data-id="${s.id}" aria-label="Verwijder training">Verwijder</button>`}</div>
+  const hist=S.sessions.slice().reverse().slice(0,30).map(s=>`<li>
+    <div class="row between"><b>${dnice(s.date)} · Training ${s.workout}${s.deload?' <span class="tag">rustweek</span>':''}</b>${confirmKey==='del-'+s.id?`<span class="row"><button type="button" class="danger" data-act="del-yes" data-id="${s.id}">Verwijder</button><button type="button" data-act="cancel">Nee</button></span>`:`<span class="row" style="gap:0"><button type="button" class="ghost" data-act="edit" data-id="${s.id}">Bewerk</button><button type="button" class="ghost" data-act="del" data-id="${s.id}">Verwijder</button></span>`}</div>
     <span class="small muted">${s.entries.map(e=>esc(EX[e.ex].name)+' '+esc(setsText(e.ex,e.sets))).join(' · ')}</span></li>`).join('');
   return`${backupBanner()}
   <div class="stats">
@@ -388,26 +469,25 @@ function vProgress(){
   </section>
   <section class="card"><h3>Geschiedenis</h3>${hist?`<ul class="hist">${hist}</ul>`:'<div class="empty">Nog geen trainingen.</div>'}</section>`;
 }
-function proteinTarget(){const bw=S.settings.bw;return bw?{lo:Math.round(bw*1.6),hi:Math.round(bw*2.2),t:Math.round(bw*1.8)}:null}
 function vFood(){
-  const k=todayKey(),items=S.protein[k]||[],sum=items.reduce((a,b)=>a+b.g,0),T=proteinTarget();
-  const pct=T?Math.min(100,sum/T.t*100):0;
-  const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const dk=dkey(d);const s=(S.protein[dk]||[]).reduce((a,b)=>a+b.g,0);days.push({l:d.toLocaleDateString('nl-NL',{weekday:'narrow'}),s,dk})}
+  const k=todayKey(),items=S.protein[k]||[],sum=items.reduce((a,b)=>a+b.g,0),kc=items.reduce((a,b)=>a+(b.k||0),0),T=proteinTarget(),K=kcalTarget();
+  const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const dk=dkey(d);const s=(S.protein[dk]||[]).reduce((a,b)=>a+b.g,0);days.push({l:d.toLocaleDateString('nl-NL',{weekday:'narrow'}),s})}
   const dmax=Math.max(T?T.t:0,...days.map(d=>d.s),1);
   return`<section class="card">
-    <div class="row between"><h3>Eiwit vandaag</h3><span class="small muted">${dnice(k)}</span></div>
-    ${T?`<div class="row between" style="align-items:flex-end"><div><span class="big">${sum}</span><span class="muted"> / ${T.t} g</span></div><span class="small muted num">doel ${T.lo}–${T.hi} g</span></div>
-    <div class="meter ${sum>=T.t?'full':''}"><i style="width:${pct}%"></i></div>`
-    :`<p class="muted">Vul je gewicht in, dan rekent de app je eiwitdoel uit (1,6–2,2 gram per kilo lichaamsgewicht).</p>
-    <div class="row" style="flex-wrap:nowrap"><input id="bwSet" inputmode="decimal" placeholder="Gewicht in kg" aria-label="Lichaamsgewicht"><button type="button" class="primary" data-act="setbw">Opslaan</button></div>
-    <div><span class="big">${sum}</span><span class="muted"> g vandaag</span></div>`}
+    <div class="row between"><h3>Vandaag</h3><span class="small muted">${dnice(k)}</span></div>
+    ${T?'':`<p class="muted">Vul je gewicht in, dan rekent de app je eiwitdoel uit (1,6–2,2 gram per kilo lichaamsgewicht).</p>
+    <div class="row" style="flex-wrap:nowrap"><input id="bwSet" inputmode="decimal" placeholder="Gewicht in kg" aria-label="Lichaamsgewicht"><button type="button" class="primary" data-act="setbw">Opslaan</button></div>`}
+    <div class="duo">
+      <div class="stack" style="gap:6px"><span class="label">Eiwit</span><div><span class="big">${sum}</span><span class="muted">${T?' / '+T.t:''} g</span></div>${T?`<div class="meter ${sum>=T.t?'full':''}"><i style="width:${Math.min(100,sum/T.t*100)}%"></i></div><span class="small muted num">doel ${T.lo}–${T.hi} g</span>`:''}</div>
+      <div class="stack" style="gap:6px"><span class="label">Calorieën</span><div><span class="big">${kc}</span><span class="muted">${K?' / '+K:''} kcal</span></div>${K?`<div class="meter kcal ${kc>K*1.05?'over':''}"><i style="width:${Math.min(100,kc/K*100)}%"></i></div><span class="small muted">onderhoud, schatting</span>`:`<button type="button" class="ghost small inline" data-act="gomore">Behoefte uitrekenen</button>`}</div>
+    </div>
     <span class="label">Snel toevoegen</span>
-    <div class="quick">${FOODS.map((f,i)=>`<button type="button" data-act="food" data-i="${i}">${esc(f[0])} <b>${f[1]}</b></button>`).join('')}</div>
-    <div class="row" style="flex-wrap:nowrap"><input id="fName" placeholder="Iets anders" aria-label="Omschrijving"><input id="fG" inputmode="numeric" placeholder="g" aria-label="Gram eiwit" style="max-width:80px"><button type="button" data-act="foodc">+</button></div>
-    ${items.length?`<ul class="eaten">${items.map((it,i)=>`<li><span>${esc(it.l)}</span><span class="row" style="flex-wrap:nowrap"><b class="num">${it.g} g</b><button type="button" data-act="fdel" data-i="${i}" aria-label="Verwijder ${esc(it.l)}">×</button></span></li>`).join('')}</ul>`:''}
+    <div class="quick">${FOODS.map((f,i)=>`<button type="button" data-act="food" data-i="${i}">${esc(f[0])} <b>${f[1]} g</b> <span class="muted">${f[2]}</span></button>`).join('')}</div>
+    <div class="custom"><input id="fName" placeholder="Iets anders" aria-label="Omschrijving"><input id="fG" inputmode="numeric" placeholder="g eiwit" aria-label="Gram eiwit"><input id="fK" inputmode="numeric" placeholder="kcal" aria-label="Kilocalorieën"><button type="button" data-act="foodc" aria-label="Toevoegen">+</button></div>
+    ${items.length?`<ul class="eaten">${items.map((it,i)=>`<li><span>${esc(it.l)}</span><span class="row" style="flex-wrap:nowrap"><span class="num small muted">${it.k?it.k+' kcal':''}</span><b class="num">${it.g} g</b><button type="button" data-act="fdel" data-i="${i}" aria-label="Verwijder ${esc(it.l)}">×</button></span></li>`).join('')}</ul>`:''}
   </section>
   <section class="card">
-    <h3>Afgelopen 7 dagen</h3>
+    <h3>Eiwit afgelopen 7 dagen</h3>
     <div class="days">${days.map(d=>`<div title="${d.s} g"><span class="num">${d.s||''}</span><div class="bar"><i class="${T&&d.s>=T.t?'hit':''}" style="height:${d.s/dmax*100}%"></i></div><span>${d.l}</span></div>`).join('')}</div>
     ${T?`<p class="small muted">Groen = doel van ${T.t} g gehaald.</p>`:''}
   </section>
@@ -415,7 +495,7 @@ function vFood(){
     <h3>Zo eet je voor spierkracht</h3>
     <ul class="tips">
       <li><strong>Eiwit is de basis:</strong> ${T?`${T.lo}–${T.hi} g per dag voor jou`:'1,6–2,2 g per kilo lichaamsgewicht per dag'}. Verdeel het over 3–4 momenten van ${T?Math.round(S.settings.bw*0.4)+' g':'zo’n 30–40 g'}.</li>
-      <li><strong>Eet gewoon genoeg:</strong> geen bewust overschot. Stijgt je kracht een paar weken niet en daalt je gewicht, voeg dan een extra maaltijd of snack toe.</li>
+      <li><strong>Eet op onderhoudsniveau:</strong> ${K?`ongeveer ${K} kcal per dag`:'vul bij Meer je lengte en leeftijd in voor een schatting'}. Dat is een schatting. Stijgt je kracht een paar weken niet en daalt je gewicht, voeg dan een extra maaltijd of snack toe.</li>
       <li><strong>Koolhydraten rond de training:</strong> havermout, rijst, aardappel of brood geven energie voor zware sets.</li>
       <li><strong>Groente en fruit</strong> bij elke maaltijd, en drink genoeg water.</li>
       <li><strong>Slaap 7–9 uur.</strong> Je spieren groeien tijdens het herstel, niet tijdens de training.</li>
@@ -430,18 +510,18 @@ function vFood(){
 }
 function meals(){
   const M=[
-    ['Ontbijt',[['Kwarkbowl','Magere kwark, havermout, banaan of bessen, handje noten',30,'3 min'],['Roerei op brood','3 eieren, 2 sneetjes volkoren, tomaat',28,'6 min'],['Overnight oats','Havermout, kwark en melk de avond ervoor mengen in een bakje',30,'2 min']]],
-    ['Lunch',[['Tonijnwrap','Tonijn, sla, tomaat, komkommer, salsa of mosterd',32,'5 min'],['Kip-rijstbak','Kip, rijst en wokgroente. Maak 4 bakjes in één keer',40,'25 min voor 4'],['Brood met kip en ei','Kipfilet als beleg plus een gekookt ei',25,'4 min']]],
-    ['Avondeten',[['Chili con carne','Mager gehakt, kidneybonen, tomaat en paprika. Grote pan, rest invriezen',40,'30 min'],['Zalm van de bakplaat','Zalm, krieltjes en broccoli samen in de oven',32,'25 min'],['Roerbak met rund of kip','Reepjes vlees, wokgroente, noedels en sojasaus',38,'15 min'],['Kipdijen uit de oven','Kipdijen, zoete aardappel, paprika en kruiden',35,'35 min']]],
-    ['Tussendoor',[['Kwark met fruit','250 g magere kwark',22,'1 min'],['Gekookte eieren','Kook er 6 tegelijk voor de hele week',13,'per 2'],['Eiwitshake','Na de training, met water of melk',24,'1 min'],['Edamame of beef jerky','Makkelijk mee te nemen',12,'0 min']]]
+    ['Ontbijt',[['Kwarkbowl','Magere kwark, havermout, banaan of bessen, handje noten',30,450,'3 min'],['Roerei op brood','3 eieren, 2 sneetjes volkoren, tomaat',28,420,'6 min'],['Overnight oats','Havermout, kwark en melk de avond ervoor mengen in een bakje',30,450,'2 min']]],
+    ['Lunch',[['Tonijnwrap','Tonijn, sla, tomaat, komkommer, salsa of mosterd',32,420,'5 min'],['Kip-rijstbak','Kip, rijst en wokgroente. Maak 4 bakjes in één keer',40,550,'25 min voor 4'],['Brood met kip en ei','Kipfilet als beleg plus een gekookt ei',25,380,'4 min']]],
+    ['Avondeten',[['Chili con carne','Mager gehakt, kidneybonen, tomaat en paprika. Grote pan, rest invriezen',40,600,'30 min'],['Zalm van de bakplaat','Zalm, krieltjes en broccoli samen in de oven',32,550,'25 min'],['Roerbak met rund of kip','Reepjes vlees, wokgroente, noedels en sojasaus',38,600,'15 min'],['Kipdijen uit de oven','Kipdijen, zoete aardappel, paprika en kruiden',35,600,'35 min']]],
+    ['Tussendoor',[['Kwark met fruit','250 g magere kwark',22,200,'1 min'],['Gekookte eieren','Kook er 6 tegelijk voor de hele week',13,155,'per 2'],['Eiwitshake','Na de training, met water of melk',24,120,'1 min'],['Edamame of beef jerky','Makkelijk mee te nemen',12,150,'0 min']]]
   ];
-  return M.map(([t,list])=>`<span class="label" style="margin-top:6px">${t}</span><div>${list.map(m=>`<div class="meal"><div class="row"><b>${m[0]}</b><span class="small num" style="color:var(--accent);font-weight:600">± ${m[2]} g eiwit</span></div><span class="small muted">${m[1]} · ${m[3]}</span></div>`).join('')}</div>`).join('');
+  return M.map(([t,list])=>`<span class="label" style="margin-top:6px">${t}</span><div>${list.map(m=>`<div class="meal"><div class="row"><b>${m[0]}</b><span class="small num" style="color:var(--accent);font-weight:600">± ${m[2]} g eiwit · ${m[3]} kcal</span></div><span class="small muted">${m[1]} · ${m[4]}</span></div>`).join('')}</div>`).join('');
 }
 function vMore(){
-  const d=daysSince(S.lastBackup),st=S.settings;
+  const d=daysSince(S.lastBackup),st=S.settings,K=kcalTarget();
   return`<section class="card">
     <h3>Back-up</h3>
-    <p class="${d===null||d>=7?'':'muted'}">${d===null?'Je hebt nog geen back-up gemaakt.':d===0?'Laatste back-up: vandaag.':`Laatste back-up: ${d} ${d===1?'dag':'dagen'} geleden.`}</p>
+    <p>${d===null?'Je hebt nog geen back-up gemaakt.':d===0?'Laatste back-up: vandaag.':`Laatste back-up: ${d} ${d===1?'dag':'dagen'} geleden.`}</p>
     <p class="small muted">Je gegevens staan alleen in deze browser op dit apparaat. Wis je je browsergegevens, dan zijn ze weg. Deel daarom elke week een back-up naar Google Drive: tik op de knop hieronder en kies Drive. De app herinnert je eraan.</p>
     <button type="button" class="primary block" data-act="backup">Back-up delen (bijv. naar Google Drive)</button>
     <button type="button" class="block" data-act="download">Back-up downloaden</button>
@@ -454,46 +534,68 @@ function vMore(){
     <p class="small muted">Kies je back-upbestand of plak de tekst. Dit vervangt wat nu in de app staat.</p>
     <input type="file" id="restoreFile" accept=".txt,.json,text/plain,application/json" aria-label="Back-upbestand">
     <textarea id="restoreText" placeholder="Of plak hier de back-uptekst" aria-label="Back-uptekst plakken"></textarea>
-    ${confirmKey==='restore'?`<div class="confirm"><b>${esc(restorePending.summary)}</b><span class="small muted">Wat nu in de app staat, wordt vervangen.</span><div class="row"><button type="button" class="primary" data-act="restore-yes">Terugzetten</button><button type="button" data-act="cancel">Annuleren</button></div></div>`:`<button type="button" data-act="restore">Controleer back-up</button>`}
+    ${confirmKey==='restore'&&restorePending?`<div class="confirm"><b>${esc(restorePending.summary)}</b><span class="small muted">Wat nu in de app staat, wordt vervangen.</span><div class="row"><button type="button" class="primary" data-act="restore-yes">Terugzetten</button><button type="button" data-act="cancel">Annuleren</button></div></div>`:`<button type="button" data-act="restore">Controleer back-up</button>`}
   </section>
   <section class="card">
-    <h3>Instellingen</h3>
+    <h3>Jij</h3>
+    <p class="small muted">Voor je eiwitdoel en een schatting van je caloriebehoefte. Blijft alleen op dit apparaat.</p>
     <div class="grid2">
       <label class="field">Lichaamsgewicht (kg)<input id="s-bw" inputmode="decimal" value="${st.bw??''}"></label>
+      <label class="field">Lengte (cm)<input id="s-height" inputmode="numeric" value="${st.height??''}"></label>
+      <label class="field">Leeftijd<input id="s-age" inputmode="numeric" value="${st.age??''}"></label>
+      <label class="field">Geslacht<select id="s-sex"><option value="m" ${st.sex!=='v'?'selected':''}>Man</option><option value="v" ${st.sex==='v'?'selected':''}>Vrouw</option></select></label>
+    </div>
+    <label class="field">Hoe actief ben je?<select id="s-act">${ACT.map(a=>`<option value="${a[0]}" ${+st.act===a[0]?'selected':''}>${a[1]}</option>`).join('')}</select></label>
+    ${K?`<p class="small">Geschatte behoefte op onderhoudsniveau: <b class="num">${K} kcal</b> per dag.</p>`:''}
+    <h3 style="margin-top:6px">Materiaal</h3>
+    <div class="grid2">
       <label class="field">Zwaarste stang (kg)<input id="s-maxBar" inputmode="decimal" value="${st.maxBar}"></label>
       <label class="field">Zwaarste dumbbell (kg)<input id="s-maxDb" inputmode="decimal" value="${st.maxDb}"></label>
       <label class="field">Stapgrootte stang (kg)<input id="s-barInc" inputmode="decimal" value="${st.barInc}"></label>
       <label class="field">Stapgrootte dumbbell (kg)<input id="s-dbInc" inputmode="decimal" value="${st.dbInc}"></label>
     </div>
-    <button type="button" data-act="savesettings">Instellingen opslaan</button>
+    <button type="button" class="primary" data-act="savesettings">Opslaan</button>
+    ${Object.keys(S.swaps).length?`<h3 style="margin-top:6px">Gewisselde oefeningen</h3><ul class="eaten">${Object.entries(S.swaps).map(([o,n])=>`<li><span class="small">${esc(EX[o].name)} → <b>${esc(EX[n].name)}</b></span><button type="button" data-act="unswap" data-o="${o}">Terugzetten</button></li>`).join('')}</ul>`:''}
   </section>
   <section class="card">
     <h3>Alles wissen</h3>
-    ${confirmKey==='wipe'?`<div class="confirm"><b>Alle trainingen, gewichten en eiwitgegevens wissen?</b><span class="small muted">Dit kan niet ongedaan worden gemaakt, tenzij je een back-up hebt.</span><div class="row"><button type="button" class="danger" data-act="wipe-yes">Alles wissen</button><button type="button" data-act="cancel">Annuleren</button></div></div>`:`<button type="button" class="danger" data-act="wipe">Alles wissen</button>`}
+    ${confirmKey==='wipe'?`<div class="confirm"><b>Alle trainingen, gewichten en voedingsgegevens wissen?</b><span class="small muted">Dit kan niet ongedaan worden gemaakt, tenzij je een back-up hebt.</span><div class="row"><button type="button" class="danger" data-act="wipe-yes">Alles wissen</button><button type="button" data-act="cancel">Annuleren</button></div></div>`:`<button type="button" class="danger" data-act="wipe">Alles wissen</button>`}
   </section>`;
 }
 
-
 function render(){
-  const v=$('#view');
-  v.innerHTML=tab==='train'?vTrain():tab==='progress'?vProgress():tab==='food'?vFood():vMore();
+  $('#view').innerHTML=tab==='train'?vTrain():tab==='progress'?vProgress():tab==='food'?vFood():vMore();
   document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===tab?'page':'false'));
   const d=daysSince(S.lastBackup),chip=$('#backupChip');
   if(!hasData()){chip.className='chip';chip.textContent='Lokaal opgeslagen'}
   else if(d!==null&&d<7){chip.className='chip ok';chip.textContent=d===0?'Back-up vandaag':`Back-up ${d}d geleden`}
   else{chip.className='chip late';chip.textContent=d===null?'Geen back-up':`Back-up ${d}d geleden`}
-  if(!storageOk)toast('Opslaan lukt niet in deze weergave. Maak een back-up.');
+  if(!storageOk)toast('Opslaan lukt niet in deze browser. Maak een back-up.');
 }
-function go(t){tab=t;confirmKey=null;render();window.scrollTo(0,0)}
+function go(t){tab=t;confirmKey=null;swapOpen=null;render();window.scrollTo(0,0)}
 
-
-function startTimer(sec,label){timer.end=Date.now()+sec*1000;timer.label=label;$('#timer').hidden=false;$('#timerLabel').textContent='Rust · '+label;tickTimer();clearInterval(timer.iv);timer.iv=setInterval(tickTimer,250)}
-function tickTimer(){const left=Math.round((timer.end-Date.now())/1000),t=$('#timer');const a=Math.abs(left);
+function runTimer(mode,sec,label,onDone){
+  timer.mode=mode;timer.end=Date.now()+sec*1000;timer.onDone=onDone||null;
+  const t=$('#timer');t.hidden=false;t.classList.remove('over');t.classList.toggle('hold',mode==='hold');
+  $('#timerLabel').textContent=label;$('#timerPlus').hidden=mode==='hold';
+  tickTimer();clearInterval(timer.iv);timer.iv=setInterval(tickTimer,250);
+}
+function buzz(){try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
+function tickTimer(){
+  const left=Math.ceil((timer.end-Date.now())/1000),t=$('#timer'),a=Math.abs(left);
   $('#timerClock').textContent=(left<0?'+':'')+Math.floor(a/60)+':'+String(a%60).padStart(2,'0');
-  if(left<=0&&!t.classList.contains('over')){t.classList.add('over');$('#timerLabel').textContent='Volgende set';try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
-  if(left>0)t.classList.remove('over')}
-function stopTimer(){clearInterval(timer.iv);$('#timer').hidden=true;$('#timer').classList.remove('over')}
-
+  if(left<=0&&timer.mode==='hold'){const f=timer.onDone;timer.onDone=null;buzz();stopTimer();if(f)f();return}
+  if(left<=0&&!t.classList.contains('over')){t.classList.add('over');$('#timerLabel').textContent=timer.mode==='next'?$('#timerLabel').textContent.replace('Rust · ',''):'Volgende set';buzz()}
+}
+function stopTimer(){clearInterval(timer.iv);timer.mode=null;$('#timer').hidden=true;$('#timer').classList.remove('over','hold')}
+function afterSet(id){
+  const D=S.draft,rows=D.entries[id],ix=D.slots.findIndex(s=>s.cur===id);
+  if(rows.every(s=>s.done)){
+    const nx=D.slots[ix+1];
+    if(nx)runTimer('next',EX[nx.cur].rest>=120?120:90,'Rust · Naar: '+EX[nx.cur].name);
+    else{stopTimer();toast('Laatste oefening klaar. Tijd voor afkoelen en rekken.')}
+  }else runTimer('rest',EX[id].rest,'Rust · '+EX[id].name);
+}
 
 function payload(){return JSON.stringify({app:'krachthuis',exported:new Date().toISOString(),data:Object.assign({},S,{draft:null})},null,1)}
 function markBackup(msg){S.lastBackup=Date.now();save();render();toast(msg)}
@@ -514,16 +616,10 @@ function doDownload(){
 }
 function showCopy(){const b=$('#copyBox');if(!b)return;b.hidden=false;b.value=payload();b.focus();b.select()}
 async function doCopy(){
-  const txt=payload();
-  try{await navigator.clipboard.writeText(txt);S.lastBackup=Date.now();save();render();toast('Gekopieerd. Plak het in een notitie of mail.')}
+  try{await navigator.clipboard.writeText(payload());markBackup('Gekopieerd. Plak het in een notitie of mail.')}
   catch(e){showCopy();toast('Selecteer de tekst en kopieer hem zelf.')}
 }
-let restorePending=null;
-function parseBackup(txt){
-  const o=JSON.parse(txt);const d=o&&o.app==='krachthuis'?o.data:o;
-  if(!d||!Array.isArray(d.sessions))throw new Error('bad');
-  return d;
-}
+function parseBackup(txt){const o=JSON.parse(txt);const d=o&&o.app==='krachthuis'?o.data:o;if(!d||!Array.isArray(d.sessions))throw new Error('bad');return d}
 async function checkRestore(){
   const f=$('#restoreFile').files[0];let txt=$('#restoreText').value.trim();
   if(f)txt=await f.text();
@@ -531,59 +627,83 @@ async function checkRestore(){
   try{const d=parseBackup(txt);restorePending={d,summary:`Back-up met ${d.sessions.length} trainingen en ${(d.weights||[]).length} gewichtsmetingen gevonden.`};confirmKey='restore';render()}
   catch(e){toast('Dit is geen geldige Krachthuis-back-up.')}
 }
-
+function finishDraft(){
+  const D=S.draft,entries=[];
+  D.slots.forEach(sl=>{const sets=(D.entries[sl.cur]||[]).filter(s=>s.done).map(s=>({w:isWeighted(sl.cur)?(num(s.w)??''):'',r:num(s.r)||0}));if(sets.length)entries.push({ex:sl.cur,sets})});
+  if(!entries.length){toast('Vink eerst de sets aan die je hebt gedaan.');return}
+  if(D.editId){const s=S.sessions.find(x=>x.id===D.editId);if(s)s.entries=entries
+    S.draft=null;save();stopTimer();tab='progress';render();window.scrollTo(0,0);toast('Training bijgewerkt.');return}
+  const prs=D.deload?[]:entries.filter(en=>{if(!isWeighted(en.ex))return false;const prev=S.sessions.filter(s=>!s.deload).flatMap(s=>s.entries.filter(x=>x.ex===en.ex).map(x=>score(en.ex,x.sets)));return prev.length&&score(en.ex,en.sets)>Math.max(...prev)}).map(en=>EX[en.ex].name);
+  S.sessions.push({id:Date.now().toString(36),ts:Date.now(),date:D.date,workout:D.workout,entries,deload:!!D.deload});
+  S.draft=null;save();stopTimer();tab='train';render();window.scrollTo(0,0);
+  toast(prs.length?'Opgeslagen. Nieuw record: '+prs.join(', '):'Training opgeslagen.');
+}
 
 document.addEventListener('click',e=>{
   const nb=e.target.closest('nav.tabs button');if(nb){go(nb.dataset.tab);return}
   if(e.target.closest('#backupChip')){go('more');return}
   if(e.target.closest('#timerStop')){stopTimer();return}
-  if(e.target.closest('#timerPlus')){timer.end+=15000;tickTimer();return}
+  if(e.target.closest('#timerPlus')){timer.end+=15000;$('#timer').classList.remove('over');tickTimer();return}
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act,id=b.dataset.ex,i=+b.dataset.i;
   switch(a){
     case'pick':pickWo=b.dataset.w;render();break;
-    case'start':{const w=b.dataset.w,ent={};WO[w].ex.forEach(x=>{const sg=suggest(x);ent[x]=Array.from({length:EX[x].sets},()=>({w:sg.w===''?'':sg.w,r:sg.r,done:false}))});
-      S.draft={workout:w,date:todayKey(),started:Date.now(),entries:ent};pickWo=null;save();render();window.scrollTo(0,0);break}
-    case'tick':{const s=S.draft.entries[id][i];s.done=!s.done;save();render();if(s.done)startTimer(EX[id].rest,EX[id].name);break}
+    case'start':{const w=b.dataset.w,slots=WO[w].ex.map(o=>({orig:o,cur:S.swaps[o]||o})),ent={};slots.forEach(sl=>ent[sl.cur]=freshRows(sl.cur));
+      S.draft={workout:w,date:todayKey(),started:Date.now(),slots,entries:ent,warm:{},cool:{},deload:isDeload()};pickWo=null;save();render();window.scrollTo(0,0);break}
+    case'tick':{const s=S.draft.entries[id][i];s.done=!s.done;save();render();if(s.done&&!S.draft.editId)afterSet(id);break}
+    case'hold':{const s=S.draft.entries[id][i],sec=num(s.r)||EX[id].min;runTimer('hold',sec,'Vasthouden · '+EX[id].name+' · set '+(i+1),()=>{if(!S.draft||!S.draft.entries[id])return;S.draft.entries[id][i].done=true;save();render();afterSet(id)});break}
+    case'chk':{const k=b.dataset.k,st=S.draft[k]=S.draft[k]||{};st[i]=!st[i];save();render();break}
+    case'chktimer':{const k=b.dataset.k,list=k==='warm'?WARM:COOL;runTimer('hold',list[i][1],list[i][0],()=>{if(!S.draft)return;(S.draft[k]=S.draft[k]||{})[i]=true;save();render()});break}
     case'addset':{const arr=S.draft.entries[id],l=arr[arr.length-1]||{w:'',r:EX[id].min};arr.push({w:l.w,r:l.r,done:false});save();render();break}
-    case'finish':{const D=S.draft,entries=[];
-      Object.keys(D.entries).forEach(x=>{const sets=D.entries[x].filter(s=>s.done).map(s=>({w:s.w===''?'':+String(s.w).replace(',','.'),r:+s.r||0}));if(sets.length)entries.push({ex:x,sets})});
-      if(!entries.length){toast('Vink eerst de sets aan die je hebt gedaan.');break}
-      const prs=entries.filter(en=>{const k=EX[en.ex].kind;if(k!=='bar'&&k!=='db')return false;const prev=S.sessions.flatMap(s=>s.entries.filter(x=>x.ex===en.ex).map(x=>score(en.ex,x.sets)));return prev.length&&score(en.ex,en.sets)>Math.max(...prev)}).map(en=>EX[en.ex].name);
-      S.sessions.push({id:Date.now().toString(36),ts:Date.now(),date:D.date,workout:D.workout,entries});S.draft=null;save();stopTimer();tab='train';render();window.scrollTo(0,0);
-      toast(prs.length?'Opgeslagen. Nieuw record: '+prs.join(', '):'Training opgeslagen.');break}
+    case'swap':swapOpen=+b.dataset.slot;render();document.getElementById('ex-'+S.draft.slots[swapOpen].cur).scrollIntoView({block:'nearest'});break;
+    case'swapclose':swapOpen=null;render();break;
+    case'swapto':{const D=S.draft,sl=D.slots[+b.dataset.slot],to=b.dataset.to;delete D.entries[sl.cur];sl.cur=to;D.entries[to]=freshRows(to);
+      if(to===sl.orig)delete S.swaps[sl.orig];else S.swaps[sl.orig]=to;swapOpen=null;save();render();toast(`${EX[to].name} staat nu in training ${D.workout}.`);break}
+    case'unswap':delete S.swaps[b.dataset.o];save();render();break;
+    case'finish':finishDraft();break;
     case'discard':confirmKey='discard';render();break;
-    case'discard-yes':S.draft=null;confirmKey=null;save();stopTimer();render();break;
+    case'discard-yes':{const ed=S.draft&&S.draft.editId;S.draft=null;confirmKey=null;save();stopTimer();tab=ed?'progress':'train';render();break}
     case'cancel':confirmKey=null;restorePending=null;render();break;
+    case'edit':{if(S.draft){toast('Rond eerst je lopende training af.');break}
+      const s=S.sessions.find(x=>x.id===b.dataset.id);if(!s)break;const ent={};s.entries.forEach(en=>ent[en.ex]=en.sets.map(x=>({w:x.w,r:x.r,done:true})));
+      S.draft={workout:s.workout,date:s.date,editId:s.id,slots:s.entries.map(en=>({orig:en.ex,cur:en.ex})),entries:ent,deload:!!s.deload};save();tab='train';render();window.scrollTo(0,0);break}
     case'del':confirmKey='del-'+b.dataset.id;render();break;
     case'del-yes':S.sessions=S.sessions.filter(s=>s.id!==b.dataset.id);confirmKey=null;save();render();toast('Training verwijderd.');break;
-    case'addbw':{const v=parseFloat($('#bwIn').value.replace(',','.'));if(!(v>30&&v<300)){toast('Vul je gewicht in kilo in.');break}
+    case'addbw':{const v=num($('#bwIn').value);if(!(v>30&&v<300)){toast('Vul je gewicht in kilo in.');break}
       const k=todayKey();S.weights=S.weights.filter(w=>w.date!==k);S.weights.push({date:k,kg:v});S.weights.sort((x,y)=>x.date<y.date?-1:1);S.settings.bw=v;save();render();toast('Gewicht opgeslagen.');break}
-    case'setbw':{const v=parseFloat($('#bwSet').value.replace(',','.'));if(!(v>30&&v<300)){toast('Vul je gewicht in kilo in.');break}S.settings.bw=v;save();render();break}
-    case'food':{const f=FOODS[i],k=todayKey();(S.protein[k]=S.protein[k]||[]).push({l:f[0],g:f[1]});save();render();break}
-    case'foodc':{const g=parseInt($('#fG').value,10);if(!(g>0&&g<300)){toast('Vul het aantal gram eiwit in.');break}const k=todayKey();(S.protein[k]=S.protein[k]||[]).push({l:$('#fName').value.trim()||'Eigen invoer',g});save();render();break}
+    case'setbw':{const v=num($('#bwSet').value);if(!(v>30&&v<300)){toast('Vul je gewicht in kilo in.');break}S.settings.bw=v;save();render();break}
+    case'gomore':go('more');break;
+    case'food':{const f=FOODS[i],k=todayKey();(S.protein[k]=S.protein[k]||[]).push({l:f[0],g:f[1],k:f[2]});save();render();break}
+    case'foodc':{const g=parseInt($('#fG').value,10)||0,kc=parseInt($('#fK').value,10)||0;if(!(g>0||kc>0)){toast('Vul gram eiwit of kcal in.');break}
+      const k=todayKey();(S.protein[k]=S.protein[k]||[]).push({l:$('#fName').value.trim()||'Eigen invoer',g,k:kc});save();render();break}
     case'fdel':{const k=todayKey();S.protein[k].splice(i,1);if(!S.protein[k].length)delete S.protein[k];save();render();break}
     case'backup':doBackup();break;
     case'download':doDownload();break;
     case'copy':doCopy();break;
     case'restore':checkRestore();break;
-    case'restore-yes':{S=Object.assign(def(),restorePending.d,{settings:Object.assign(def().settings,restorePending.d.settings||{}),draft:null,lastBackup:Date.now()});restorePending=null;confirmKey=null;save();render();toast('Back-up teruggezet.');break}
-    case'savesettings':{const n=x=>{const v=parseFloat(($('#s-'+x).value||'').replace(',','.'));return isFinite(v)&&v>0?v:null};
-      const bw=n('bw');S.settings.bw=bw;['maxBar','maxDb','barInc','dbInc'].forEach(x=>{const v=n(x);if(v)S.settings[x]=v});save();render();toast('Instellingen opgeslagen.');break}
+    case'restore-yes':S=normalize(restorePending.d);S.draft=null;S.lastBackup=Date.now();restorePending=null;confirmKey=null;save();render();toast('Back-up teruggezet.');break;
+    case'savesettings':{const st=S.settings,p=x=>{const v=num($('#s-'+x).value);return v&&v>0?v:null};
+      st.bw=p('bw');st.height=p('height');st.age=p('age');st.sex=$('#s-sex').value;st.act=+$('#s-act').value;
+      ['maxBar','maxDb','barInc','dbInc'].forEach(x=>{const v=p(x);if(v)st[x]=v});save();render();toast('Opgeslagen.');break}
+    case'deload-start':startDeload();render();toast('Rustweek gestart.');break;
+    case'deload-snooze':S.deload.snooze=addDays(todayKey(),7);save();render();break;
+    case'deload-stop':S.deload.until=null;S.deload.lastEnd=todayKey();save();render();break;
     case'wipe':confirmKey='wipe';render();break;
     case'wipe-yes':S=def();confirmKey=null;save();stopTimer();render();toast('Alles gewist.');break;
   }
 });
 document.addEventListener('input',e=>{
-  const t=e.target;if(t.dataset&&t.dataset.f&&S.draft){const s=S.draft.entries[t.dataset.ex][+t.dataset.i];s[t.dataset.f]=t.value.replace(',','.');save()}
+  const t=e.target;if(!S.draft)return;
+  if(t.dataset&&t.dataset.f){const s=S.draft.entries[t.dataset.ex][+t.dataset.i];s[t.dataset.f]=t.value.replace(',','.');save()}
 });
 document.addEventListener('change',e=>{if(e.target.id==='exSel'){chartEx=e.target.value;render()}});
 function showTip(r){const c=r.closest('.chart'),tip=c.querySelector('.tip'),svg=c.querySelector('svg').getBoundingClientRect();
   tip.textContent=r.dataset.tip;tip.hidden=false;tip.style.left=(+r.dataset.cx*svg.width)+'px';tip.style.top=(+r.dataset.cy*svg.height)+'px'}
 document.addEventListener('pointerover',e=>{const r=e.target.closest('.hit');if(r)showTip(r)});
-document.addEventListener('pointerout',e=>{const r=e.target.closest('.hit');if(r){const tip=r.closest('.chart').querySelector('.tip');tip.hidden=true}});
+document.addEventListener('pointerout',e=>{const r=e.target.closest('.hit');if(r)r.closest('.chart').querySelector('.tip').hidden=true});
 document.addEventListener('pointerdown',e=>{const r=e.target.closest('.hit');if(r)showTip(r)});
 
+if(S.draft&&!S.draft.slots){const w=S.draft.workout;S.draft.slots=Object.keys(S.draft.entries).map(x=>({orig:x,cur:x}));if(!WO[w])S.draft=null}
 render();
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();
