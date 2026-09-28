@@ -253,7 +253,7 @@ let S=load();
 let tab='train',pickWo=null,confirmKey=null,chartEx=null,swapOpen=null,restorePending=null,storageOk=true;
 let timer={mode:null,end:0,iv:null,onDone:null};
 
-function def(){return{v:1,settings:{bw:null,maxBar:50,maxDb:15,barInc:2.5,dbInc:2,sex:'m',age:null,height:null,act:1.55},sessions:[],draft:null,protein:{},weights:[],lastBackup:null,swaps:{},deload:{until:null,lastEnd:null,snooze:null}}}
+function def(){return{v:1,settings:{bw:null,maxBar:50,maxDb:15,barInc:2.5,dbInc:2,sex:'m',age:null,height:null,act:1.55,sound:true},sessions:[],draft:null,protein:{},weights:[],lastBackup:null,swaps:{},deload:{until:null,lastEnd:null,snooze:null}}}
 function normalize(d){const b=def();return Object.assign(b,d,{settings:Object.assign(b.settings,d.settings||{}),swaps:Object.assign({},d.swaps||{}),deload:Object.assign(b.deload,d.deload||{})})}
 function load(){try{const raw=localStorage.getItem(KEY);if(raw)return normalize(JSON.parse(raw))}catch(e){}return def()}
 function save(){
@@ -304,7 +304,7 @@ function suggest(id){
     const w=+L[0].w||0,top=L.length>=e.sets&&L.every(s=>+s.r>=e.max);
     if(top){const nw=Math.round((w+inc)*100)/100;
       if(nw>cap)return{w,r:e.max,sets:e.sets,text:`Je zit aan je zwaarste ${e.kind==='bar'?'stang':'dumbbells'}. Maak het zwaarder door 3 tellen te zakken of een set toe te voegen.`};
-      return{w:nw,r:e.min,sets:e.sets,text:`Alle sets op ${e.max} gehaald. Gewicht omhoog naar ${fmt(nw)} kg, begin weer op ${e.min}.`}}
+      return{w,r:e.max,sets:e.sets,up:{w:nw,r:e.min},text:`Alle sets op ${e.max} gehaald. Voorstel: gewicht omhoog naar ${fmt(nw)} kg en weer beginnen op ${e.min}.`}}
     const low=Math.min(...L.map(s=>+s.r||0)),r=Math.min(e.max,low+1);
     return{w,r,sets:e.sets,text:`Zelfde gewicht (${fmt(w)} kg). Probeer ${r} herhalingen in elke set.`};
   }
@@ -345,7 +345,7 @@ function vTrain(){
   if(S.draft)return vSession();
   const w=pickWo||nextWo(),W=WO[w],n=thisWeekCount(),dl=isDeload();
   const list=planIds(w).map((id,ix)=>{const e=EX[id],sg=suggest(id),sw=id!==W.ex[ix];
-    const tgt=`${sg.sets} × ${e.min}–${e.max}${e.kind==='time'?' s':''}${isWeighted(id)&&sg.w!==''?' · '+fmt(sg.w)+' kg':''}`;
+    const tgt=`${sg.sets} × ${e.min}–${e.max}${e.kind==='time'?' s':''}${isWeighted(id)&&sg.w!==''?' · '+fmt(sg.w)+' kg'+(sg.up?' ↑':''):''}`;
     return`<li><span class="t">${esc(e.name)}${e.side?' <span class="muted small">per kant</span>':''}${sw?' <span class="tag">gewisseld</span>':''}</span><span class="s num">${tgt}</span></li>`}).join('');
   return`${backupBanner()}${deloadCard()}
   <section class="card">
@@ -401,7 +401,7 @@ function vSession(){
     return`<section class="card ex" id="ex-${id}">
       <div class="ex-head"><h3>${esc(e.name)}</h3><span class="tag num">${e.sets} × ${e.min}–${e.max}${tm?' s':''}${e.side?' p/k':''}</span></div>
       <div class="small muted">Rust tussen sets: ${restTxt(e.rest)}${tm?' · tik ▶ voor de timer':''}</div>
-      ${ed?'':`<div class="hint">${esc(sg.text)}${L?`<div class="small muted">Vorige keer: ${esc(setsText(id,L))}</div>`:''}</div>`}
+      ${ed?'':`<div class="hint">${esc(sg.up&&D.sug&&D.sug[id]?(D.sug[id]==='yes'?`Gewicht omhoog naar ${fmt(sg.up.w)} kg. Begin op ${sg.up.r} herhalingen.`:'Zelfde gewicht als vorige keer. Het voorstel komt de volgende training terug.'):sg.text)}${sg.up&&!(D.sug&&D.sug[id])?`<div class="row" style="margin-top:8px"><button type="button" class="primary" data-act="sug-yes" data-ex="${id}">Doen</button><button type="button" data-act="sug-no" data-ex="${id}">Later</button></div>`:''}${L?`<div class="small muted">Vorige keer: ${esc(setsText(id,L))}</div>`:''}</div>`}
       <div class="sets">${sets}</div>
       ${swap}
       <div class="row between">
@@ -547,6 +547,9 @@ function vMore(){
     </div>
     <label class="field">Hoe actief ben je?<select id="s-act">${ACT.map(a=>`<option value="${a[0]}" ${+st.act===a[0]?'selected':''}>${a[1]}</option>`).join('')}</select></label>
     ${K?`<p class="small">Geschatte behoefte op onderhoudsniveau: <b class="num">${K} kcal</b> per dag.</p>`:''}
+    <h3 style="margin-top:6px">Training</h3>
+    <div class="row between"><span>Geluid als de rust voorbij is</span><button type="button" class="tick" data-act="sound" aria-pressed="${!!st.sound}" aria-label="Geluid aan of uit">${st.sound?'✓':''}</button></div>
+    <p class="small muted">Tijdens een training blijft je scherm aan, zodat de timer zichtbaar blijft.</p>
     <h3 style="margin-top:6px">Materiaal</h3>
     <div class="grid2">
       <label class="field">Zwaarste stang (kg)<input id="s-maxBar" inputmode="decimal" value="${st.maxBar}"></label>
@@ -571,6 +574,7 @@ function render(){
   else if(d!==null&&d<7){chip.className='chip ok';chip.textContent=d===0?'Back-up vandaag':`Back-up ${d}d geleden`}
   else{chip.className='chip late';chip.textContent=d===null?'Geen back-up':`Back-up ${d}d geleden`}
   if(!storageOk)toast('Opslaan lukt niet in deze browser. Maak een back-up.');
+  syncWake();
 }
 function go(t){tab=t;confirmKey=null;swapOpen=null;render();window.scrollTo(0,0)}
 
@@ -580,7 +584,15 @@ function runTimer(mode,sec,label,onDone){
   $('#timerLabel').textContent=label;$('#timerPlus').hidden=mode==='hold';
   tickTimer();clearInterval(timer.iv);timer.iv=setInterval(tickTimer,250);
 }
-function buzz(){try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
+let actx=null;
+function unlockAudio(){try{if(!actx){const C=window.AudioContext||window.webkitAudioContext;if(C)actx=new C()}if(actx&&actx.state==='suspended')actx.resume()}catch(e){}}
+function beep(){if(!S.settings.sound||!actx)return;try{const t0=actx.currentTime;[0,.22,.44].forEach((d,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type='sine';o.frequency.value=i===2?1320:880;g.gain.setValueAtTime(.0001,t0+d);g.gain.exponentialRampToValueAtTime(.35,t0+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+d+.18);o.connect(g);g.connect(actx.destination);o.start(t0+d);o.stop(t0+d+.2)})}catch(e){}}
+function buzz(){beep();try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
+let wake=null;
+async function syncWake(){const want=!!(S.draft&&!S.draft.editId)&&document.visibilityState==='visible';
+  try{if(want&&!wake&&navigator.wakeLock){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null})}
+  else if(!want&&wake){const w=wake;wake=null;await w.release()}}catch(e){wake=null}}
+document.addEventListener('visibilitychange',()=>{syncWake();if(document.visibilityState==='visible'&&timer.mode)tickTimer()});
 function tickTimer(){
   const left=Math.ceil((timer.end-Date.now())/1000),t=$('#timer'),a=Math.abs(left);
   $('#timerClock').textContent=(left<0?'+':'')+Math.floor(a/60)+':'+String(a%60).padStart(2,'0');
@@ -644,6 +656,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#backupChip')){go('more');return}
   if(e.target.closest('#timerStop')){stopTimer();return}
   if(e.target.closest('#timerPlus')){timer.end+=15000;$('#timer').classList.remove('over');tickTimer();return}
+  unlockAudio();
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act,id=b.dataset.ex,i=+b.dataset.i;
   switch(a){
@@ -662,6 +675,9 @@ document.addEventListener('click',e=>{
     case'unswap':delete S.swaps[b.dataset.o];save();render();break;
     case'finish':finishDraft();break;
     case'discard':confirmKey='discard';render();break;
+    case'sug-yes':{const sg=suggest(id),D=S.draft;(D.sug=D.sug||{})[id]='yes';D.entries[id].forEach(r=>{if(!r.done){r.w=sg.up.w;r.r=sg.up.r}});save();render();break}
+    case'sug-no':{(S.draft.sug=S.draft.sug||{})[id]='no';save();render();break}
+    case'sound':S.settings.sound=!S.settings.sound;save();render();if(S.settings.sound){unlockAudio();beep()}break;
     case'discard-yes':{const ed=S.draft&&S.draft.editId;S.draft=null;confirmKey=null;save();stopTimer();tab=ed?'progress':'train';render();break}
     case'cancel':confirmKey=null;restorePending=null;render();break;
     case'edit':{if(S.draft){toast('Rond eerst je lopende training af.');break}
