@@ -177,6 +177,8 @@ button.inline{min-height:0;padding:0 4px;display:inline;font-size:inherit}
 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;background:var(--good);vertical-align:middle}
 .dot.late{background:var(--warn)}
 .code{font-family:ui-monospace,Menlo,monospace;font-size:17px;letter-spacing:.04em;background:var(--surface-2);border-radius:8px;padding:10px 12px;word-break:break-all;user-select:all}
+.keep{gap:8px;font-size:15px}
+.keep input{width:20px;min-height:20px;height:20px}
 </style>
 </head>
 <body>
@@ -236,14 +238,33 @@ const EX={
   dbrdl:{name:'Roemeense deadlift met dumbbells',kind:'db',sets:3,min:10,max:15,rest:90,cues:['Dumbbells voor je bovenbenen.','Heupen naar achter, rug recht.','Omhoog door je heupen naar voren te duwen.']},
   glute:{name:'Bilbrug op één been',kind:'bw',sets:3,min:8,max:15,rest:60,side:true,cues:['Op je rug, één voet plat, ander been gestrekt.','Duw je heupen omhoog tot je lichaam recht is.','Bovenaan 1 tel knijpen.']},
   reardelt:{name:'Achterste schouder heffen',kind:'db',sets:3,min:12,max:20,rest:60,cues:['Voorovergebogen, lichte dumbbells.','Armen zijwaarts omhoog, ellebogen licht gebogen.','Schouderbladen naar elkaar.']},
+  dbrow2:{name:'Voorovergebogen roeien met dumbbells',kind:'db',sets:3,min:8,max:12,rest:90,cues:['Dumbbell in elke hand, heupen naar achter, rug recht.','Trek beide dumbbells naar je heupen, ellebogen langs je lichaam.','Onderaan armen gestrekt, schouderbladen even los.']},
+  pullover:{name:'Dumbbell pullover',kind:'db',sets:3,min:10,max:15,rest:75,cues:['Op je rug op de grond, knieën gebogen, één dumbbell met twee handen boven je borst.','Armen licht gebogen; laat de dumbbell langzaam achter je hoofd zakken tot net boven de grond.','Trek hem met je rugspieren terug boven je borst.']},
+  ohtri:{name:'Triceps extensie boven het hoofd',kind:'db',sets:3,min:10,max:15,rest:75,cues:['Zittend of staand, één dumbbell met twee handen boven je hoofd.','Laat hem achter je hoofd zakken; ellebogen wijzen naar voren en blijven op hun plek.','Strek je armen weer tot boven je hoofd.']},
+  skull:{name:'Liggende triceps extensie',kind:'db',sets:3,min:10,max:15,rest:75,cues:['Op je rug op de grond, dumbbells boven je borst, handpalmen naar elkaar.','Buig alleen je ellebogen: dumbbells zakken naast je hoofd.','Bovenarmen blijven stil; strek weer uit.']},
+  kickback:{name:'Triceps kickback',kind:'db',sets:3,min:12,max:15,rest:60,side:true,cues:['Voorovergebogen, één hand op een stoel, bovenarm langs je lichaam.','Strek je onderarm naar achteren tot je arm gestrekt is.','Even vasthouden, langzaam terug.']},
+  cgfloor:{name:'Floor press smalle greep',kind:'bar',sets:3,min:8,max:12,rest:90,cues:['Liggend op de grond, handen op schouderbreedte op de stang.','Ellebogen dicht langs je lichaam.','Zak tot je bovenarmen de grond raken en druk op.']},
+  shrug:{name:'Shrugs met stang',kind:'bar',sets:3,min:10,max:15,rest:75,cues:['Stang voor je bovenbenen, armen gestrekt.','Trek je schouders recht omhoog naar je oren, niet rollen.','Bovenaan 1 tel vasthouden, langzaam zakken.']},
+  dbshrug:{name:'Shrugs met dumbbells',kind:'db',sets:3,min:12,max:20,rest:60,cues:['Dumbbells naast je lichaam, armen gestrekt.','Schouders recht omhoog naar je oren.','Bovenaan 1 tel vasthouden.']},
+  hipthrust:{name:'Hip thrust met stang',kind:'bar',sets:3,min:8,max:12,rest:90,cues:['Bovenrug tegen de bank of een stevige stoel, stang over je heupen (leg er een handdoek onder).','Duw je heupen omhoog tot je lichaam van knie tot schouder recht is.','Bovenaan billen aanspannen, gecontroleerd zakken.']},
+  sumodl:{name:'Sumo deadlift',kind:'bar',sets:3,min:5,max:8,rest:150,cues:['Voeten breed, tenen iets naar buiten, handen binnen je knieën.','Borst op, rug recht, knieën naar buiten duwen.','Duw de vloer weg en kom rechtop.']},
+  dbsumo:{name:'Sumo squat met dumbbell',kind:'db',sets:3,min:12,max:20,rest:75,cues:['Voeten breed, één dumbbell tussen je benen.','Zak recht naar beneden, knieën naar buiten.','Rug recht, omhoog door je hielen.']},
+  calf:{name:'Kuitheffen met dumbbells',kind:'db',sets:3,min:12,max:20,rest:60,cues:['Dumbbells naast je lichaam, voorvoeten op een traptree of boek.','Kom zo hoog mogelijk op je tenen.','Langzaam zakken tot een lichte rek.']},
+  dbfly:{name:'Floor fly met dumbbells',kind:'db',sets:3,min:10,max:15,rest:60,cues:['Op je rug, dumbbells boven je borst, armen licht gebogen.','Open je armen zijwaarts tot je bovenarmen de grond raken.','Breng ze in een boog terug.']},
+  arnold:{name:'Arnold press',kind:'db',sets:3,min:8,max:12,rest:90,cues:['Dumbbells voor je schouders, handpalmen naar je toe.','Draai je handen naar buiten terwijl je omhoog drukt.','Omgekeerd terug naar beneden.']},
+  pushpress:{name:'Push press',kind:'bar',sets:3,min:5,max:8,rest:120,cues:['Stang op schouderhoogte.','Zak kort door je knieën en druk explosief omhoog met hulp van je benen.','Gecontroleerd terug naar je schouders.']},
+  revcurl:{name:'Reverse curl met stang',kind:'bar',sets:3,min:10,max:15,rest:60,cues:['Bovenhandse greep op schouderbreedte.','Curl de stang omhoog, ellebogen langs je lichaam.','Traint ook je onderarmen.']},
+  conc:{name:'Concentratie curl',kind:'db',sets:3,min:10,max:15,rest:60,side:true,cues:['Zittend, elleboog tegen de binnenkant van je bovenbeen.','Curl de dumbbell naar je schouder.','Langzaam terug tot een gestrekte arm.']},
+  russian:{name:'Russian twist met dumbbell',kind:'db',sets:3,min:10,max:20,rest:60,cues:['Zittend, voeten eventueel van de grond, bovenlichaam iets naar achter.','Draai de dumbbell van links naar rechts langs je heupen.','Aantal = totaal aantal draaien.']},
   dbcurl:{name:'Hamer curl',kind:'db',sets:3,min:10,max:15,rest:60,cues:['Dumbbells met duimen naar boven.','Ellebogen naast je lichaam.','Twee tellen omlaag.']}
 };
-const ALT={bss:['revlunge','stepup','goblet'],ohp:['dbpress','pike'],pullup:['negpull','chinup','invrow'],bbrow:['dbrow','invrow'],pushup:['dbfloor','floor'],plank:['sideplank','deadbug'],rdl:['dbrdl','glute'],floor:['dbfloor','pushup'],chinup:['negpull','pullup','invrow'],dbrow:['bbrow','invrow'],lunge:['revlunge','stepup'],knee:['deadbug','plank'],dl:['rdl','dbrdl'],goblet:['bss','stepup'],pike:['dbpress','ohp'],lat:['reardelt','dbpress'],curl:['dbcurl','chinup']};
+const ALT={bss:['revlunge','stepup','goblet'],ohp:['dbpress','pike','arnold','pushpress'],pullup:['negpull','chinup','pullover'],bbrow:['dbrow','dbrow2'],pushup:['dbfloor','floor','cgfloor'],plank:['sideplank','deadbug','russian'],rdl:['dbrdl','glute','hipthrust'],floor:['dbfloor','pushup','cgfloor','dbfly'],chinup:['negpull','pullup','pullover'],dbrow:['bbrow','dbrow2'],lunge:['revlunge','stepup','dbsumo'],knee:['deadbug','plank','russian'],dl:['rdl','dbrdl','sumodl'],goblet:['bss','stepup','dbsumo'],pike:['dbpress','ohp','arnold'],lat:['reardelt','dbpress','arnold'],curl:['dbcurl','chinup','revcurl','conc'],ohtri:['skull','kickback','cgfloor'],shrug:['dbshrug']};
 const WO={
   A:{focus:'Benen, schouders en rug',ex:['bss','ohp','pullup','bbrow','pushup','plank']},
-  B:{focus:'Achterkant benen, borst en rug',ex:['rdl','floor','chinup','dbrow','lunge','knee']},
-  C:{focus:'Deadlift, schouders en armen',ex:['dl','goblet','pike','pullup','lat','curl']}
+  B:{focus:'Achterkant benen, borst, rug en monnikskap',ex:['rdl','floor','chinup','dbrow','shrug','lunge','knee']},
+  C:{focus:'Deadlift, schouders en armen',ex:['dl','goblet','pike','pullup','lat','curl','ohtri']}
 };
+const GRP=[['Benen en billen',['bss','goblet','lunge','revlunge','stepup','dbsumo','rdl','dbrdl','dl','sumodl','hipthrust','glute','calf']],['Borst',['pushup','floor','dbfloor','dbfly']],['Rug en monnikskap',['pullup','chinup','negpull','bbrow','dbrow','dbrow2','pullover','shrug','dbshrug']],['Schouders',['ohp','dbpress','arnold','pushpress','pike','lat','reardelt']],['Armen',['curl','dbcurl','revcurl','conc','ohtri','skull','kickback','cgfloor']],['Core',['plank','sideplank','deadbug','knee','russian']]];
 const WARM=[['Op de plaats lopen of touwtje springen',60],['10 armcirkels voor- en achteruit',0],['10 squats zonder gewicht',0],['10 heupscharnieren zonder gewicht',0],['Hangen aan de stang',20],['1–2 lichte sets van de eerste oefening',0]];
 const COOL=[['Hamstrings rekken, per been',30],['Heupbuiger rekken (knielend), per kant',30],['Borst rekken in een deurpost',30],['Lats rekken: hangen of voorover aan tafel',30],['Kuiten rekken tegen de muur, per been',30]];
 const FOODS=[
@@ -263,7 +284,7 @@ let M=loadMeta(),fb=null,fbLoading=null,syncBusy=false,syncErr=false,pushT=null,
 function loadMeta(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')||{}}catch(e){return{}}}
 function saveMeta(){try{localStorage.setItem(SKEY,JSON.stringify(M))}catch(e){}}
 function cloudCfg(){const c=window.KRACHTHUIS_FIREBASE;return c&&c.apiKey&&c.projectId?c:null}
-function cloudOn(){return !!(M.code&&cloudCfg())}
+function cloudOn(){return !!(M.code&&M.enabled!==false&&cloudCfg())}
 function dataJson(){return JSON.stringify(Object.assign({},S,{draft:null}))}
 function hash(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)+':'+str.length}
 function newCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',b=new Uint8Array(24);crypto.getRandomValues(b);return Array.from(b,x=>A[x%A.length]).join('')}
@@ -280,6 +301,8 @@ function getDb(){
   return fbLoading;
 }
 const docRef=(db,code)=>db.collection('krachthuis').doc(code);
+function withTimeout(p,ms=15000){return Promise.race([p,new Promise((_,no)=>setTimeout(()=>no({code:'timeout'}),ms))])}
+const errKind=e=>e&&e.code==='permission-denied'?'rules':true;
 function noteChange(){
   if(!cloudOn())return;
   const h=hash(dataJson());if(h===M.pushed)return;
@@ -290,29 +313,31 @@ async function push(){
   if(!cloudOn()||!M.dirty||syncBusy)return;
   if(navigator.onLine===false){syncErr=true;renderChip();return}
   syncBusy=true;renderChip();
-  try{const db=await getDb(),j=dataJson();await docRef(db,M.code).set({data:j,updatedAt:M.modified||Date.now(),v:1});
+  try{const db=await withTimeout(getDb()),j=dataJson();await withTimeout(docRef(db,M.code).set({data:j,updatedAt:M.modified||Date.now(),v:1}));
     M.pushed=hash(j);M.dirty=hash(dataJson())!==M.pushed;M.synced=Date.now();saveMeta();syncErr=false}
-  catch(e){syncErr=e&&e.code==='permission-denied'?'rules':true}
+  catch(e){syncErr=errKind(e)}
   syncBusy=false;renderChip();if(M.dirty&&!syncErr){clearTimeout(pushT);pushT=setTimeout(push,1500)}
 }
 async function pull(){
   if(!cloudOn()||syncBusy)return;
   if(navigator.onLine===false){syncErr=true;renderChip();return}
   syncBusy=true;renderChip();
-  try{const db=await getDb(),snap=await docRef(db,M.code).get();syncErr=false;syncBusy=false;
+  try{const db=await withTimeout(getDb()),snap=await withTimeout(docRef(db,M.code).get());syncErr=false;syncBusy=false;
     if(!snap.exists){M.dirty=true;saveMeta();push();return}
     const r=snap.data(),rh=hash(r.data);
     if(rh===hash(dataJson())){M.pushed=rh;M.dirty=false;M.synced=Date.now();saveMeta()}
     else if((r.updatedAt||0)>(M.modified||0)&&!M.dirty){applyRemote(r)}
-    else if((r.updatedAt||0)>(M.modified||0)){applyRemote(r);toast('Nieuwere gegevens uit de cloud geladen.')}
+    else if((r.updatedAt||0)>(M.modified||0)){if(applyRemote(r))toast('Nieuwere gegevens uit de cloud geladen.')}
     else{M.dirty=true;saveMeta();push()}
-  }catch(e){syncErr=e&&e.code==='permission-denied'?'rules':true;syncBusy=false}
+  }catch(e){syncErr=errKind(e);syncBusy=false}
   renderChip();
 }
+function remoteData(r){if(!isObj(r)||typeof r.data!=='string')throw bad('ongeldig');let d;try{d=JSON.parse(r.data)}catch(e){throw bad('ongeldig')}return validData(d)}
 function applyRemote(r){
-  const d=normalize(JSON.parse(r.data)),draft=S.draft;S=d;S.draft=draft;
+  let d;try{d=remoteData(r)}catch(e){syncErr='invalid';renderChip();toast('De gegevens in de cloud zijn ongeldig en zijn niet geladen. Je gegevens op deze telefoon blijven staan.');return false}
+  const draft=S.draft;S=d;S.draft=draft;
   try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
-  M.pushed=hash(r.data);M.dirty=false;M.modified=r.updatedAt||Date.now();M.synced=Date.now();saveMeta();render();
+  M.pushed=hash(r.data);M.dirty=false;M.modified=r.updatedAt||Date.now();M.synced=Date.now();saveMeta();syncErr=false;render();return true
 }
 async function cloudEnable(){
   if(!cloudCfg()){toast('Cloud-opslag is nog niet ingesteld.');return}
@@ -322,17 +347,28 @@ async function cloudEnable(){
 }
 async function cloudCheck(){
   const code=cleanCode($('#cloudCode').value);
-  if(code.length<20){toast('Die code is te kort. Controleer hem nog eens.');return}
-  try{const db=await getDb(),snap=await docRef(db,code).get();
+  if(code.length!==24){toast(`Een code heeft 24 tekens. Jij hebt er ${code.length} ingevuld.`);return}
+  if(/[01OI]/.test(code)){toast('Een code bevat nooit 0, 1, O of I. Controleer de tekens nog eens.');return}
+  try{const db=await withTimeout(getDb()),snap=await withTimeout(docRef(db,code).get());
     if(!snap.exists){toast('Geen gegevens gevonden bij deze code.');return}
-    const r=snap.data(),d=JSON.parse(r.data);
+    const r=snap.data();let d;try{d=remoteData(r)}catch(e){toast('De gegevens bij deze code zijn ongeldig en worden niet geladen.');return}
     cloudPending={code,r,summary:`Gevonden: ${(d.sessions||[]).length} trainingen en ${(d.weights||[]).length} gewichtsmetingen.`};confirmKey='cloud';render();
   }catch(e){toast(e&&e.code==='permission-denied'?'Geen toegang. Controleer de Firestore-regels.':'De cloud is niet bereikbaar. Ben je online?')}
 }
 function cloudConnect(){const p=cloudPending;M={code:p.code};saveMeta();applyRemote(p.r);cloudPending=null;confirmKey=null;render();toast('Verbonden. Je gegevens zijn geladen.')}
-function cloudOff(){M={};saveMeta();confirmKey=null;showCode=false;render();toast('Cloud-opslag staat uit op dit apparaat.')}
+function cloudOff(){clearTimeout(pushT);M.enabled=false;saveMeta();confirmKey=null;showCode=false;syncErr=false;render();toast('Cloud-opslag staat uit op dit apparaat. Je code blijft bewaard.')}
+async function cloudResume(){
+  try{const db=await withTimeout(getDb()),snap=await withTimeout(docRef(db,M.code).get());
+    const lj=dataJson();
+    if(!snap.exists||snap.data().data===lj){M.enabled=true;M.dirty=!snap.exists;M.modified=Date.now();saveMeta();render();if(M.dirty)push();else{M.pushed=hash(lj);M.synced=Date.now();saveMeta();render()}toast('Cloud-opslag staat weer aan.');return}
+    const r=snap.data();let d;try{d=remoteData(r)}catch(e){toast('De gegevens in de cloud zijn ongeldig. Kies "Deze telefoon gebruiken" om ze te vervangen.');d=null}
+    cloudPending={code:M.code,r,resume:true,summary:`In de cloud: ${d?d.sessions.length:'?'} trainingen. Op deze telefoon: ${S.sessions.length} trainingen.`,valid:!!d};confirmKey='cloud-resume';render();
+  }catch(e){toast(errKind(e)==='rules'?'Geen toegang. Controleer de Firestore-regels.':'De cloud is niet bereikbaar. Ben je online?')}
+}
+function resumeRemote(){M.enabled=true;saveMeta();if(applyRemote(cloudPending.r))toast('Cloudgegevens geladen. Cloud-opslag staat weer aan.');cloudPending=null;confirmKey=null;render()}
+function resumeLocal(){M.enabled=true;M.dirty=true;M.modified=Date.now();saveMeta();cloudPending=null;confirmKey=null;render();push();toast('Cloud-opslag staat weer aan met de gegevens van deze telefoon.')}
 async function cloudDelete(){
-  try{const db=await getDb();await docRef(db,M.code).delete();cloudOff();toast('Cloudgegevens verwijderd. Je gegevens staan nog op dit apparaat.')}
+  try{const db=await withTimeout(getDb());await withTimeout(docRef(db,M.code).delete());clearTimeout(pushT);M={};saveMeta();confirmKey=null;showCode=false;syncErr=false;render();toast('Cloudgegevens verwijderd. Je gegevens staan nog op dit apparaat.')}
   catch(e){toast('Verwijderen lukt niet. Ben je online?')}
 }
 function ago(ts){if(!ts)return'nog niet';const m=Math.round((Date.now()-ts)/6e4);return m<1?'net':m<60?m+' min geleden':m<1440?Math.round(m/60)+' uur geleden':Math.round(m/1440)+' dagen geleden'}
@@ -346,7 +382,16 @@ function cloudCard(){
     <div class="row" style="flex-wrap:nowrap"><input id="cloudCode" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" aria-label="Je code"><button type="button" data-act="cloud-check">Verbinden</button></div>
     ${confirmKey==='cloud'&&cloudPending?`<div class="confirm"><b>${esc(cloudPending.summary)}</b><span class="small muted">Deze gegevens vervangen wat nu op dit apparaat staat.</span><div class="row"><button type="button" class="primary" data-act="cloud-connect">Verbinden en laden</button><button type="button" data-act="cancel">Annuleren</button></div></div>`:''}
   </section>`;
-  const st=syncBusy?'Bezig met opslaan…':syncErr==='rules'?'Geen toegang tot de cloud. Controleer of de Firestore-regels voor Krachthuis zijn gepubliceerd.':syncErr?'Niet bereikbaar. Wordt opnieuw geprobeerd zodra je online bent.':M.dirty?'Wijzigingen wachten op opslaan.':'Alles opgeslagen · '+ago(M.synced);
+  if(M.enabled===false)return`<section class="card">
+    <h3>Automatisch opslaan</h3>
+    <p class="muted"><span class="dot late"></span>Staat uit op dit apparaat. Je gegevens in de cloud blijven bewaard.</p>
+    <span class="label">Jouw code</span>
+    <div class="code num">${showCode?prettyCode(M.code):'••••-••••-••••-••••-••••-'+M.code.slice(-4)}</div>
+    <div class="row"><button type="button" data-act="cloud-show">${showCode?'Verbergen':'Tonen'}</button><button type="button" data-act="cloud-copy">Kopieer code</button></div>
+    ${confirmKey==='cloud-resume'&&cloudPending?`<div class="confirm"><b>De cloud en deze telefoon verschillen.</b><span class="small muted">${esc(cloudPending.summary)} Welke wil je houden? De andere wordt vervangen.</span><div class="stack">${cloudPending.valid?'<button type="button" class="primary" data-act="resume-remote">Cloudversie laden</button>':''}<button type="button" data-act="resume-local">Deze telefoon gebruiken</button><button type="button" class="ghost" data-act="cancel">Annuleren</button></div></div>`
+    :`<div class="row"><button type="button" class="primary" data-act="cloud-resume">Weer aanzetten</button><button type="button" data-act="cloud-forget">Andere code gebruiken</button></div>`}
+  </section>`;
+  const st=syncBusy?'Bezig met opslaan…':syncErr==='rules'?'Geen toegang tot de cloud. Controleer of de Firestore-regels voor Krachthuis zijn gepubliceerd.':syncErr==='invalid'?'De gegevens in de cloud zijn ongeldig en zijn niet geladen. Je gegevens op deze telefoon worden bij de volgende wijziging opnieuw opgeslagen.':syncErr?'Niet bereikbaar. Wordt opnieuw geprobeerd zodra je online bent.':M.dirty?'Wijzigingen wachten op opslaan.':'Alles opgeslagen · '+ago(M.synced);
   return`<section class="card">
     <h3>Automatisch opslaan</h3>
     <p class="${syncErr?'':'muted'}"><span class="dot ${syncErr?'late':'ok'}"></span>${st}</p>
@@ -361,15 +406,15 @@ function cloudCard(){
 }
 function renderChip(){
   const chip=$('#backupChip');if(!chip)return;
-  if(cloudOn()){chip.className='chip '+(syncErr?'late':'ok');chip.textContent=syncBusy?'Opslaan…':syncErr?'Cloud offline':M.dirty?'Opslaan…':'Opgeslagen';return}
+  if(cloudOn()){chip.className='chip '+(syncErr?'late':'ok');chip.textContent=syncBusy?'Opslaan…':syncErr==='rules'?'Controleer Firestore-regels':syncErr==='invalid'?'Cloudgegevens ongeldig':syncErr?'Cloud offline':M.dirty?'Opslaan…':'Opgeslagen';return}
   const d=daysSince(S.lastBackup);
   if(!hasData()){chip.className='chip';chip.textContent='Lokaal opgeslagen'}
   else if(d!==null&&d<7){chip.className='chip ok';chip.textContent=d===0?'Back-up vandaag':`Back-up ${d}d geleden`}
   else{chip.className='chip late';chip.textContent=d===null?'Geen back-up':`Back-up ${d}d geleden`}
 }
 window.addEventListener('online',()=>{if(cloudOn()){syncErr=false;M.dirty?push():pull()}});
-function def(){return{v:1,settings:{bw:null,maxBar:50,maxDb:15,barInc:2.5,dbInc:2,sex:'m',age:null,height:null,act:1.55,sound:true},sessions:[],draft:null,protein:{},weights:[],lastBackup:null,swaps:{},deload:{until:null,lastEnd:null,snooze:null}}}
-function normalize(d){const b=def();return Object.assign(b,d,{settings:Object.assign(b.settings,d.settings||{}),swaps:Object.assign({},d.swaps||{}),deload:Object.assign(b.deload,d.deload||{})})}
+function def(){return{v:1,settings:{bw:null,maxBar:50,maxDb:15,barInc:2.5,dbInc:2,sex:'m',age:null,height:null,act:1.55,sound:true},sessions:[],draft:null,protein:{},weights:[],lastBackup:null,swaps:{},extra:{},deload:{until:null,lastEnd:null,snooze:null}}}
+function normalize(d){const b=def();return Object.assign(b,d,{settings:Object.assign(b.settings,d.settings||{}),swaps:Object.assign({},d.swaps||{}),extra:Object.assign({},d.extra||{}),deload:Object.assign(b.deload,d.deload||{})})}
 function load(){try{const raw=localStorage.getItem(KEY);if(raw)return normalize(JSON.parse(raw))}catch(e){}return def()}
 function save(){
   try{localStorage.setItem(KEY,JSON.stringify(S));storageOk=true}catch(e){storageOk=false}
@@ -412,8 +457,11 @@ function suggest(id){
   const inc=e.kind==='bar'?S.settings.barInc:S.settings.dbInc,cap=e.kind==='bar'?S.settings.maxBar:S.settings.maxDb;
   if(isDeload()){
     if(!L)return{w:'',r:e.min,sets:2,text:'Rustweek: 2 rustige sets, niet tot het uiterste.'};
-    const w=wt?roundTo((+L[0].w||0)*0.9,inc):'',r=Math.min(...L.map(s=>+s.r||0));
-    return{w,r,sets:2,text:`Rustweek: 2 sets${wt?`, ~10% lichter (${fmt(w)} kg)`:''}. Stop ruim voordat het zwaar wordt.`};
+    const r0=Math.min(...L.map(s=>+s.r||0));
+    if(!wt)return{w:'',r:r0,sets:2,text:'Rustweek: 2 sets. Stop ruim voordat het zwaar wordt.'};
+    const cw=+L[0].w||0;let w=Math.floor((cw*0.9+1e-9)/inc)*inc;if(w>=cw)w=cw-inc;w=Math.round(w*100)/100;
+    if(w<inc){const r=Math.max(1,Math.round(r0*0.8));return{w:cw,r,sets:2,text:`Rustweek: 2 sets met hetzelfde gewicht (${fmt(cw)} kg), maar ongeveer 20% minder herhalingen: ${r} per set.`}}
+    return{w,r:r0,sets:2,text:`Rustweek: 2 sets, lichter (${fmt(w)} kg in plaats van ${fmt(cw)} kg). Stop ruim voordat het zwaar wordt.`};
   }
   if(wt){
     if(!L)return{w:'',r:e.min,sets:e.sets,text:`Eerste keer: kies een gewicht waarmee je ${e.min}–${e.max} herhalingen haalt en er nog 1–2 over hebt.`};
@@ -433,7 +481,11 @@ function suggest(id){
 function setsText(id,sets){if(!sets||!sets.length)return'';
   if(isWeighted(id)){const ws=[...new Set(sets.map(s=>fmt(+s.w||0)))];return sets.map(s=>s.r).join(' / ')+' × '+ws.join('/')+' kg'}
   return sets.map(s=>s.r).join(' / ')+(EX[id].kind==='time'?' s':' herh.')}
-function planIds(w){return WO[w].ex.map(id=>S.swaps[id]||id)}
+function buildSlots(w){const orig=WO[w].ex,used=new Set();
+  const sl=orig.map(o=>{const c=S.swaps[o];let cur=o;if(c&&c!==o&&EX[c]&&!orig.includes(c)&&!used.has(c))cur=c;used.add(cur);return{orig:o,cur}});
+  ((S.extra||{})[w]||[]).forEach(x=>{if(EX[x]&&!used.has(x)&&!orig.includes(x)){used.add(x);sl.push({orig:x,cur:x,extra:true})}});
+  return sl}
+function planIds(w){return buildSlots(w).map(s=>s.cur)}
 function nextWo(){const l=S.sessions[S.sessions.length-1];if(!l)return'A';return{A:'B',B:'C',C:'A'}[l.workout]||'A'}
 function thisWeekCount(){const ws=weekStart(new Date()).getTime();return S.sessions.filter(s=>s.ts>=ws).length}
 function freshRows(id){const sg=suggest(id);return Array.from({length:sg.sets},()=>({w:sg.w,r:sg.r,done:false}))}
@@ -460,9 +512,9 @@ function checklist(list,key,title,sub){
 function vTrain(){
   if(S.draft)return vSession();
   const w=pickWo||nextWo(),W=WO[w],n=thisWeekCount(),dl=isDeload();
-  const list=planIds(w).map((id,ix)=>{const e=EX[id],sg=suggest(id),sw=id!==W.ex[ix];
+  const list=planIds(w).map((id,ix)=>{const e=EX[id],sg=suggest(id),sw=ix<W.ex.length&&id!==W.ex[ix],xt=ix>=W.ex.length;
     const tgt=`${sg.sets} × ${e.min}–${e.max}${e.kind==='time'?' s':''}${isWeighted(id)&&sg.w!==''?' · '+fmt(sg.w)+' kg'+(sg.up?' ↑':''):''}`;
-    return`<li><span class="t">${esc(e.name)}${e.side?' <span class="muted small">per kant</span>':''}${sw?' <span class="tag">gewisseld</span>':''}</span><span class="s num">${tgt}</span></li>`}).join('');
+    return`<li><span class="t">${esc(e.name)}${e.side?' <span class="muted small">per kant</span>':''}${sw?' <span class="tag">gewisseld</span>':''}${xt?' <span class="tag">toegevoegd</span>':''}</span><span class="s num">${tgt}</span></li>`}).join('');
   return`${backupBanner()}${deloadCard()}
   <section class="card">
     <div class="row" style="gap:16px;flex-wrap:nowrap">
@@ -470,7 +522,7 @@ function vTrain(){
       <div class="stack" style="gap:4px">
         <span class="label">${w===nextWo()?'Volgende training':'Gekozen training'}${dl?' · rustweek':''}</span>
         <h2>Training ${w}</h2>
-        <span class="muted">${W.focus} · ± ${dl?30:45} min</span>
+        <span class="muted">${W.focus} · ± ${dl?30:planIds(w).length>6?50:45} min</span>
       </div>
     </div>
     <div class="seg" role="group" aria-label="Kies training">${['A','B','C'].map(x=>`<button type="button" data-act="pick" data-w="${x}" aria-pressed="${x===w}">${x}</button>`).join('')}</div>
@@ -497,8 +549,19 @@ function vTrain(){
       <li><strong>Hoe zwaar?</strong> Eindig elke set met 1–2 herhalingen over. Techniek gaat voor gewicht.</li>
       <li><strong>Vooruitgang:</strong> haal je bij alle sets het bovenste getal, dan gaat het gewicht omhoog. De app rekent het voor je uit.</li>
       <li><strong>Doet iets pijn?</strong> Tik tijdens de training op "Wissel" voor een alternatief.</li>
+      <li><strong>Meer doen?</strong> Onderaan de training voeg je met "+ Oefening toevoegen" een extra oefening toe, voor één keer of vast.</li>
       <li><strong>Rustweek:</strong> na ongeveer 6 weken stelt de app er zelf een voor.${dl?'':' <button type="button" class="ghost small inline" data-act="deload-start">Nu starten</button>'}</li>
     </ul>
+  </section>`;
+}
+let pickOpen=false,pickKeep=false;
+function addPicker(){
+  const D=S.draft;
+  if(!pickOpen)return`<button type="button" class="block" data-act="pick-open">+ Oefening toevoegen</button>`;
+  const inUse=new Set(D.slots.map(x=>x.cur));
+  return`<section class="card" id="picker"><div class="row between"><h3>Oefening toevoegen</h3><button type="button" class="ghost" data-act="pick-close">Sluiten</button></div>
+    <label class="row keep"><input type="checkbox" id="pickKeep" ${pickKeep?'checked':''}> Vast toevoegen aan training ${D.workout}</label>
+    ${GRP.map(([g,ids])=>{const l=ids.filter(x=>EX[x]&&!inUse.has(x));return l.length?`<span class="label">${g}</span><div class="quick">${l.map(x=>`<button type="button" data-act="pick-add" data-ex="${x}">${esc(EX[x].name)}</button>`).join('')}</div>`:''}).join('')}
   </section>`;
 }
 function vSession(){
@@ -522,13 +585,14 @@ function vSession(){
       ${swap}
       <div class="row between">
         <details><summary>Uitvoering</summary><ul>${e.cues.map(c=>`<li>${esc(c)}</li>`).join('')}<li><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(e.name+' uitvoering')}" target="_blank" rel="noopener">Bekijk een video</a></li></ul></details>
-        <span class="row" style="gap:0">${ed||!opts.length?'':`<button type="button" class="ghost" data-act="swap" data-slot="${ix}">Wissel</button>`}<button type="button" class="ghost" data-act="addset" data-ex="${id}">+ Set</button></span>
+        <span class="row" style="gap:0">${!ed&&sl.extra?`<button type="button" class="ghost" data-act="rmslot" data-slot="${ix}">Verwijder</button>`:''}${ed||!opts.length?'':`<button type="button" class="ghost" data-act="swap" data-slot="${ix}">Wissel</button>`}<button type="button" class="ghost" data-act="addset" data-ex="${id}">+ Set</button></span>
       </div>
     </section>`}).join('');
   const all=Object.values(D.entries).flat(),done=all.filter(s=>s.done).length;
   return`<section class="row between"><div><span class="label">${ed?'Bewerken · '+dnice(D.date):'Bezig'}${D.deload?' · rustweek':''}</span><h2>Training ${D.workout}</h2></div><span class="num muted">${done}/${all.length} sets</span></section>
   ${ed?'<p class="small muted">Pas gewichten en herhalingen aan. Vink een set uit om hem te verwijderen.</p>':checklist(WARM,'warm','Warming-up','Ongeveer 5 minuten. Zo worden je spieren en gewrichten warm voor de eerste zware set.')}
   ${cards}
+  ${ed?'':addPicker()}
   ${ed?'':checklist(COOL,'cool','Afkoelen en rekken','Rustig rekken, niet verend. Adem door.')}
   <section class="card">
     ${confirmKey==='discard'?`<div class="confirm"><b>Training weggooien?</b><span class="small muted">Wat je nu hebt ingevuld wordt niet bewaard.</span><div class="row"><button type="button" class="danger" data-act="discard-yes">Weggooien</button><button type="button" data-act="cancel">Terug</button></div></div>`:''}
@@ -638,11 +702,12 @@ function vMore(){
   return`${cloudCard()}<section class="card">
     <h3>${cloudOn()?'Extra back-up':'Back-up'}</h3>
     <p>${d===null?'Je hebt nog geen back-up gemaakt.':d===0?'Laatste back-up: vandaag.':`Laatste back-up: ${d} ${d===1?'dag':'dagen'} geleden.`}</p>
-    <p class="small muted">Je gegevens staan alleen in deze browser op dit apparaat. Wis je je browsergegevens, dan zijn ze weg. Deel daarom elke week een back-up naar Google Drive: tik op de knop hieronder en kies Drive. De app herinnert je eraan.</p>
+    <p class="small muted">${cloudOn()?'Je gegevens worden automatisch in de cloud opgeslagen. Wil je daarnaast een eigen kopie, maak dan af en toe een extra back-up.':'Je gegevens staan alleen in deze browser op dit apparaat. Wis je je browsergegevens, dan zijn ze weg. Deel daarom elke week een back-up naar Google Drive: tik op de knop hieronder en kies Drive. De app herinnert je eraan.'}</p>
     <button type="button" class="primary block" data-act="backup">Back-up delen (bijv. naar Google Drive)</button>
     <button type="button" class="block" data-act="download">Back-up downloaden</button>
     <button type="button" class="block" data-act="copy">Kopieer als tekst</button>
     <p class="small muted">Lukt delen of downloaden niet? Kopieer de tekst en plak die in een notitie of mail aan jezelf.</p>
+    ${confirmKey==='bk'?`<div class="confirm" id="bkConfirm"><b>${esc(bkMsg)}</b><span class="small muted">Zet het op een veilige plek, bijvoorbeeld in Google Drive: open Drive, tik op + en kies Uploaden. Pas daarna telt het als back-up.</span><div class="row"><button type="button" class="primary" data-act="bk-mark">Het staat veilig: markeer als back-up</button><button type="button" data-act="cancel">Later</button></div></div>`:''}
     <textarea id="copyBox" readonly hidden aria-label="Back-uptekst"></textarea>
   </section>
   <section class="card">
@@ -674,11 +739,12 @@ function vMore(){
       <label class="field">Stapgrootte dumbbell (kg)<input id="s-dbInc" inputmode="decimal" value="${st.dbInc}"></label>
     </div>
     <button type="button" class="primary" data-act="savesettings">Opslaan</button>
+    ${Object.values(S.extra||{}).some(l=>l.length)?`<h3 style="margin-top:6px">Toegevoegde oefeningen</h3><ul class="eaten">${Object.entries(S.extra).flatMap(([w,l])=>l.map(x=>`<li><span class="small">Training ${w}: <b>${esc(EX[x].name)}</b></span><button type="button" data-act="unextra" data-w="${w}" data-o="${x}">Verwijderen</button></li>`)).join('')}</ul>`:''}
     ${Object.keys(S.swaps).length?`<h3 style="margin-top:6px">Gewisselde oefeningen</h3><ul class="eaten">${Object.entries(S.swaps).map(([o,n])=>`<li><span class="small">${esc(EX[o].name)} → <b>${esc(EX[n].name)}</b></span><button type="button" data-act="unswap" data-o="${o}">Terugzetten</button></li>`).join('')}</ul>`:''}
   </section>
   <section class="card">
     <h3>Alles wissen</h3>
-    ${confirmKey==='wipe'?`<div class="confirm"><b>Alle trainingen, gewichten en voedingsgegevens wissen?</b><span class="small muted">Dit kan niet ongedaan worden gemaakt, tenzij je een back-up hebt.</span><div class="row"><button type="button" class="danger" data-act="wipe-yes">Alles wissen</button><button type="button" data-act="cancel">Annuleren</button></div></div>`:`<button type="button" class="danger" data-act="wipe">Alles wissen</button>`}
+    ${confirmKey==='wipe'?`<div class="confirm"><b>Alle trainingen, gewichten en voedingsgegevens wissen?</b><span class="small muted">Dit kan niet ongedaan worden gemaakt, tenzij je een back-up hebt.</span>${M.code?`<span class="small"><b>Noteer je code, anders kun je je cloudgegevens niet terughalen.</b></span><div class="code num">${prettyCode(M.code)}</div><button type="button" data-act="cloud-copy">Kopieer code</button>`:''}<div class="row"><button type="button" class="danger" data-act="wipe-yes">Alles wissen</button><button type="button" data-act="cancel">Annuleren</button></div></div>`:`<button type="button" class="danger" data-act="wipe">Alles wissen</button>`}
   </section>`;
 }
 
@@ -691,6 +757,8 @@ function render(){
 }
 function go(t){tab=t;confirmKey=null;swapOpen=null;render();window.scrollTo(0,0)}
 
+function runSeq(steps,onDone){const go=i=>{if(i>=steps.length){if(onDone)onDone();return}const st=steps[i];runTimer('hold',st[0],st[1],()=>go(i+1))};go(0)}
+function sideSteps(sec,label){return[[sec,label+' · kant 1'],[5,'Wissel van kant'],[sec,label+' · kant 2']]}
 function runTimer(mode,sec,label,onDone){
   timer.mode=mode;timer.end=Date.now()+sec*1000;timer.onDone=onDone||null;
   const t=$('#timer');t.hidden=false;t.classList.remove('over');t.classList.toggle('hold',mode==='hold');
@@ -724,6 +792,8 @@ function afterSet(id){
 
 function payload(){return JSON.stringify({app:'krachthuis',exported:new Date().toISOString(),data:Object.assign({},S,{draft:null})},null,1)}
 function markBackup(msg){S.lastBackup=Date.now();save();render();toast(msg)}
+let bkMsg='';
+function askMark(msg){bkMsg=msg;tab='more';confirmKey='bk';render();const c=document.getElementById('bkConfirm');if(c)c.scrollIntoView({block:'center'})}
 async function doBackup(){
   const name='krachthuis-backup-'+todayKey()+'.txt';
   const file=new File([payload()],name,{type:'text/plain'});
@@ -736,21 +806,45 @@ async function doBackup(){
 function doDownload(){
   try{const name='krachthuis-backup-'+todayKey()+'.txt',url=URL.createObjectURL(new Blob([payload()],{type:'text/plain'}));
     const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);
-    markBackup('Back-up staat in je Downloads-map.')}
+    askMark('Het back-upbestand staat nu in je Downloads-map, alleen op deze telefoon.')}
   catch(e){tab='more';render();showCopy();toast('Downloaden lukt niet. Kopieer de tekst.')}
 }
 function showCopy(){const b=$('#copyBox');if(!b)return;b.hidden=false;b.value=payload();b.focus();b.select()}
 async function doCopy(){
-  try{await navigator.clipboard.writeText(payload());markBackup('Gekopieerd. Plak het in een notitie of mail.')}
+  try{await navigator.clipboard.writeText(payload());askMark('De back-up is gekopieerd. Plak hem in een notitie of mail aan jezelf.')}
   catch(e){showCopy();toast('Selecteer de tekst en kopieer hem zelf.')}
 }
-function parseBackup(txt){const o=JSON.parse(txt);const d=o&&o.app==='krachthuis'?o.data:o;if(!d||!Array.isArray(d.sessions))throw new Error('bad');return d}
+function bad(msg){const e=new Error(msg);e.user=true;return e}
+const isObj=x=>x&&typeof x==='object'&&!Array.isArray(x);
+const isDate=x=>typeof x==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x);
+const isNum=x=>typeof x==='number'&&isFinite(x);
+function validData(d){
+  if(!isObj(d))throw bad('Dit is geen geldige Krachthuis-back-up.');
+  if((d.v||1)>1)throw bad('Deze back-up komt uit een nieuwere versie van de app. Werk de app eerst bij.');
+  if(d.settings!==undefined&&!isObj(d.settings))throw bad('De instellingen in dit bestand zijn ongeldig.');
+  if(!Array.isArray(d.sessions))throw bad('Er staan geen trainingen in dit bestand.');
+  d.sessions.forEach((x,i)=>{
+    const ok=isObj(x)&&typeof x.id==='string'&&isDate(x.date)&&WO[x.workout]&&isNum(x.ts)&&Array.isArray(x.entries)
+      &&x.entries.every(en=>isObj(en)&&EX[en.ex]&&Array.isArray(en.sets)&&en.sets.every(st=>isObj(st)&&isNum(+st.r)));
+    if(!ok)throw bad(`Training ${i+1} in dit bestand is beschadigd.`);
+  });
+  if(d.weights!==undefined&&!(Array.isArray(d.weights)&&d.weights.every(w=>isObj(w)&&isDate(w.date)&&isNum(w.kg))))throw bad('De gewichtsmetingen in dit bestand zijn ongeldig.');
+  if(d.protein!==undefined&&!(isObj(d.protein)&&Object.entries(d.protein).every(([k,v])=>isDate(k)&&Array.isArray(v)&&v.every(it=>isObj(it)&&isNum(it.g)))))throw bad('De voedingsgegevens in dit bestand zijn ongeldig.');
+  const sw={};if(isObj(d.swaps))Object.entries(d.swaps).forEach(([o,n])=>{if(EX[o]&&EX[n])sw[o]=n});
+  const ext={};if(isObj(d.extra))Object.entries(d.extra).forEach(([w,l])=>{if(WO[w]&&Array.isArray(l))ext[w]=l.filter(x=>EX[x])});
+  const n=normalize(Object.assign({},d,{swaps:sw,extra:ext,draft:null}));
+  if(!isObj(n.deload))n.deload=def().deload;
+  return n;
+}
+function parseBackup(txt){let o;try{o=JSON.parse(txt)}catch(e){throw bad('Dit is geen geldige Krachthuis-back-up.')}
+  if(!isObj(o)||o.app!=='krachthuis'||!isObj(o.data))throw bad('Dit is geen Krachthuis-back-up.');
+  return validData(o.data)}
 async function checkRestore(){
   const f=$('#restoreFile').files[0];let txt=$('#restoreText').value.trim();
   if(f)txt=await f.text();
   if(!txt){toast('Kies eerst een bestand of plak de tekst.');return}
   try{const d=parseBackup(txt);restorePending={d,summary:`Back-up met ${d.sessions.length} trainingen en ${(d.weights||[]).length} gewichtsmetingen gevonden.`};confirmKey='restore';render()}
-  catch(e){toast('Dit is geen geldige Krachthuis-back-up.')}
+  catch(e){toast(e&&e.user?e.message:'Dit is geen geldige Krachthuis-back-up.')}
 }
 function finishDraft(){
   const D=S.draft,entries=[];
@@ -774,17 +868,25 @@ document.addEventListener('click',e=>{
   const a=b.dataset.act,id=b.dataset.ex,i=+b.dataset.i;
   switch(a){
     case'pick':pickWo=b.dataset.w;render();break;
-    case'start':{const w=b.dataset.w,slots=WO[w].ex.map(o=>({orig:o,cur:S.swaps[o]||o})),ent={};slots.forEach(sl=>ent[sl.cur]=freshRows(sl.cur));
+    case'start':{pickOpen=false;const w=b.dataset.w,slots=buildSlots(w),ent={};slots.forEach(sl=>ent[sl.cur]=freshRows(sl.cur));
       S.draft={workout:w,date:todayKey(),started:Date.now(),slots,entries:ent,warm:{},cool:{},deload:isDeload()};pickWo=null;save();render();window.scrollTo(0,0);break}
     case'tick':{const s=S.draft.entries[id][i];s.done=!s.done;save();render();if(s.done&&!S.draft.editId)afterSet(id);break}
-    case'hold':{const s=S.draft.entries[id][i],sec=num(s.r)||EX[id].min;runTimer('hold',sec,'Vasthouden · '+EX[id].name+' · set '+(i+1),()=>{if(!S.draft||!S.draft.entries[id])return;S.draft.entries[id][i].done=true;save();render();afterSet(id)});break}
+    case'hold':{const s=S.draft.entries[id][i],sec=num(s.r)||EX[id].min,lb='Vasthouden · '+EX[id].name+' · set '+(i+1);runSeq(EX[id].side?sideSteps(sec,lb):[[sec,lb]],()=>{if(!S.draft||!S.draft.entries[id]||!S.draft.entries[id][i])return;S.draft.entries[id][i].done=true;save();render();afterSet(id)});break}
     case'chk':{const k=b.dataset.k,st=S.draft[k]=S.draft[k]||{};st[i]=!st[i];save();render();break}
-    case'chktimer':{const k=b.dataset.k,list=k==='warm'?WARM:COOL;runTimer('hold',list[i][1],list[i][0],()=>{if(!S.draft)return;(S.draft[k]=S.draft[k]||{})[i]=true;save();render()});break}
+    case'chktimer':{const k=b.dataset.k,list=k==='warm'?WARM:COOL,it=list[i];runSeq(/per (been|kant)/.test(it[0])?sideSteps(it[1],it[0]):[[it[1],it[0]]],()=>{if(!S.draft)return;(S.draft[k]=S.draft[k]||{})[i]=true;save();render()});break}
     case'addset':{const arr=S.draft.entries[id],l=arr[arr.length-1]||{w:'',r:EX[id].min};arr.push({w:l.w,r:l.r,done:false});save();render();break}
     case'swap':swapOpen=+b.dataset.slot;render();document.getElementById('ex-'+S.draft.slots[swapOpen].cur).scrollIntoView({block:'nearest'});break;
     case'swapclose':swapOpen=null;render();break;
     case'swapto':{const D=S.draft,sl=D.slots[+b.dataset.slot],to=b.dataset.to;delete D.entries[sl.cur];sl.cur=to;D.entries[to]=freshRows(to);
       if(to===sl.orig)delete S.swaps[sl.orig];else S.swaps[sl.orig]=to;swapOpen=null;save();render();toast(`${EX[to].name} staat nu in training ${D.workout}.`);break}
+    case'pick-open':pickOpen=true;pickKeep=false;render();document.getElementById('picker').scrollIntoView({block:'start'});break;
+    case'pick-close':pickOpen=false;render();break;
+    case'pick-add':{const D=S.draft,x=id;if(D.slots.some(o=>o.cur===x))break;D.slots.push({orig:x,cur:x,extra:true});D.entries[x]=freshRows(x);
+      if(pickKeep){const l=(S.extra[D.workout]=S.extra[D.workout]||[]);if(!l.includes(x))l.push(x)}
+      pickOpen=false;save();render();document.getElementById('ex-'+x).scrollIntoView({block:'start'});toast(pickKeep?`${EX[x].name} staat nu vast in training ${D.workout}.`:`${EX[x].name} toegevoegd aan deze training.`);break}
+    case'rmslot':{const D=S.draft,sl=D.slots[+b.dataset.slot];if(!sl)break;D.slots.splice(+b.dataset.slot,1);delete D.entries[sl.cur];save();render();
+      toast(((S.extra[D.workout]||[]).includes(sl.cur))?'Verwijderd uit deze training. Hij staat nog vast in het schema; haal hem weg onder Meer.':'Verwijderd uit deze training.');break}
+    case'unextra':{const l=S.extra[b.dataset.w]||[];S.extra[b.dataset.w]=l.filter(x=>x!==b.dataset.o);save();render();break}
     case'unswap':delete S.swaps[b.dataset.o];save();render();break;
     case'finish':finishDraft();break;
     case'discard':confirmKey='discard';render();break;
@@ -810,7 +912,7 @@ document.addEventListener('click',e=>{
     case'download':doDownload();break;
     case'copy':doCopy();break;
     case'restore':checkRestore();break;
-    case'restore-yes':S=normalize(restorePending.d);S.draft=null;S.lastBackup=Date.now();restorePending=null;confirmKey=null;save();render();toast('Back-up teruggezet.');break;
+    case'restore-yes':S=restorePending.d;S.draft=null;S.lastBackup=Date.now();restorePending=null;confirmKey=null;save();render();toast('Back-up teruggezet.');break;
     case'savesettings':{const st=S.settings,p=x=>{const v=num($('#s-'+x).value);return v&&v>0?v:null};
       st.bw=p('bw');st.height=p('height');st.age=p('age');st.sex=$('#s-sex').value;st.act=+$('#s-act').value;
       ['maxBar','maxDb','barInc','dbInc'].forEach(x=>{const v=p(x);if(v)st[x]=v});save();render();toast('Opgeslagen.');break}
@@ -818,7 +920,12 @@ document.addEventListener('click',e=>{
     case'deload-snooze':S.deload.snooze=addDays(todayKey(),7);save();render();break;
     case'deload-stop':S.deload.until=null;S.deload.lastEnd=todayKey();save();render();break;
     case'wipe':confirmKey='wipe';render();break;
-    case'wipe-yes':{const was=cloudOn();M={};saveMeta();S=def();confirmKey=null;save();stopTimer();render();toast(was?'Alles gewist op dit apparaat. De cloudgegevens blijven bewaard.':'Alles gewist.');break}
+    case'wipe-yes':{const was=!!M.code;if(M.code){M.enabled=false;clearTimeout(pushT)}saveMeta();S=def();confirmKey=null;save();stopTimer();render();toast(was?'Alles gewist op dit apparaat. De cloudgegevens blijven bewaard.':'Alles gewist.');break}
+    case'cloud-resume':cloudResume();break;
+    case'resume-remote':resumeRemote();break;
+    case'resume-local':resumeLocal();break;
+    case'cloud-forget':M={};saveMeta();showCode=false;render();break;
+    case'bk-mark':confirmKey=null;markBackup('Gemarkeerd als back-up.');break;
     case'cloud-on':cloudEnable();break;
     case'cloud-check':cloudCheck();break;
     case'cloud-connect':cloudConnect();break;
@@ -834,7 +941,7 @@ document.addEventListener('input',e=>{
   const t=e.target;if(!S.draft)return;
   if(t.dataset&&t.dataset.f){const s=S.draft.entries[t.dataset.ex][+t.dataset.i];s[t.dataset.f]=t.value.replace(',','.');save()}
 });
-document.addEventListener('change',e=>{if(e.target.id==='exSel'){chartEx=e.target.value;render()}});
+document.addEventListener('change',e=>{if(e.target.id==='pickKeep'){pickKeep=e.target.checked;return}if(e.target.id==='exSel'){chartEx=e.target.value;render()}});
 function showTip(r){const c=r.closest('.chart'),tip=c.querySelector('.tip'),svg=c.querySelector('svg').getBoundingClientRect();
   tip.textContent=r.dataset.tip;tip.hidden=false;tip.style.left=(+r.dataset.cx*svg.width)+'px';tip.style.top=(+r.dataset.cy*svg.height)+'px'}
 document.addEventListener('pointerover',e=>{const r=e.target.closest('.hit');if(r)showTip(r)});
