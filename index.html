@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1D5BB5">
+<meta name="description" content="Thuistraining voor spierkracht, met voortgang en eiwittracker.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Krachthuis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+:root{
+  --bg:#EDF0F3;--surface:#FFFFFF;--surface-2:#E2E7ED;--ink:#131A21;--ink-2:#46525F;--muted:#6F7B88;--line:#D2D9E1;
+  --accent:#1D5BB5;--accent-ink:#FFFFFF;--accent-soft:#DAE6F7;--pr:#BF2F29;--good:#2B7A4B;--warn:#9A6414;--warn-soft:#FBEFD9;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;--body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:10px;--nav-h:62px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;--bg:#0E1318;--surface:#161E27;--surface-2:#1F2A35;--ink:#E6EBF0;--ink-2:#A8B4C0;--muted:#7D8995;--line:#2A3542;
+  --accent:#5C93E6;--accent-ink:#0A1220;--accent-soft:#1A2C46;--pr:#E8665F;--good:#58B881;--warn:#DDA64A;--warn-soft:#3A2D14;}}
+:root[data-theme="dark"]{
+  color-scheme:dark;--bg:#0E1318;--surface:#161E27;--surface-2:#1F2A35;--ink:#E6EBF0;--ink-2:#A8B4C0;--muted:#7D8995;--line:#2A3542;
+  --accent:#5C93E6;--accent-ink:#0A1220;--accent-soft:#1A2C46;--pr:#E8665F;--good:#58B881;--warn:#DDA64A;--warn-soft:#3A2D14;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:0 calc(var(--nav-h) + 90px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.01em;line-height:1.1;margin:0;text-wrap:balance}
+h2{font-size:26px}h3{font-size:20px}
+p{margin:0}
+.muted{color:var(--muted)}.small{font-size:14px}.num{font-variant-numeric:tabular-nums}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);margin-inline:-16px;padding:12px 16px 10px;border-bottom:1px solid var(--line)}
+header.top .wrap{flex-direction:row;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.brand i{display:inline-block;width:10px;height:22px;border-radius:2px;background:var(--accent);box-shadow:5px 0 0 -1px var(--pr)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);border:0;font-family:var(--body);cursor:pointer}
+.chip.ok::before,.chip.late::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good)}
+.chip.late{background:var(--warn-soft);color:var(--warn)}.chip.late::before{background:var(--warn)}
+main{padding-top:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+.banner{background:var(--warn-soft);color:var(--ink);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);border-radius:var(--r);padding:12px 14px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.banner strong{color:var(--warn)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:8px}
+.label{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+button,.btn{font-family:var(--body);font-size:15px;font-weight:600;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 14px;cursor:pointer;min-height:44px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.danger{color:var(--pr);border-color:color-mix(in srgb,var(--pr) 45%,transparent)}
+button.ghost{background:transparent;border-color:transparent;color:var(--accent);padding-inline:8px}
+button.block{width:100%}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.btn:focus-visible,a:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 55%,transparent);outline-offset:2px}
+input,select,textarea{font-family:var(--body);font-size:16px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 10px;min-height:44px;width:100%}
+textarea{min-height:90px;font-size:13px;font-family:ui-monospace,Menlo,monospace}
+a{color:var(--accent)}
+
+.plate{flex:none;width:76px;height:76px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--display);font-size:40px;font-weight:700;box-shadow:inset 0 0 0 6px color-mix(in srgb,var(--accent-ink) 18%,transparent),inset 0 0 0 26px var(--accent),inset 0 0 0 28px color-mix(in srgb,var(--accent-ink) 25%,transparent)}
+.plate.B{background:var(--pr);box-shadow:inset 0 0 0 6px rgba(255,255,255,.18),inset 0 0 0 26px var(--pr),inset 0 0 0 28px rgba(255,255,255,.25)}
+.plate.C{background:var(--good);box-shadow:inset 0 0 0 6px rgba(255,255,255,.18),inset 0 0 0 26px var(--good),inset 0 0 0 28px rgba(255,255,255,.25)}
+.seg{display:flex;background:var(--surface-2);border-radius:8px;padding:3px;gap:3px}
+.seg button{flex:1;min-height:38px;border:0;background:transparent;color:var(--ink-2);padding:6px}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.exlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.exlist li{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.exlist li:first-child{border-top:0}
+.exlist .t{font-weight:600}.exlist .s{color:var(--muted);font-size:14px;text-align:right;white-space:nowrap}
+.week{display:flex;gap:6px}
+.week span{width:28px;height:8px;border-radius:4px;background:var(--surface-2)}
+.week span.on{background:var(--accent)}
+
+.ex{gap:10px}
+.ex-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ex-head h3{font-size:21px}
+.tag{font-size:12px;font-weight:600;color:var(--ink-2);background:var(--surface-2);border-radius:6px;padding:2px 7px;white-space:nowrap}
+.hint{font-size:14px;color:var(--ink-2);background:var(--accent-soft);border-radius:8px;padding:8px 10px}
+.sets{display:flex;flex-direction:column;gap:6px}
+.set{display:grid;grid-template-columns:42px 1fr 16px 1fr 48px;gap:6px;align-items:center}
+.set.bw{grid-template-columns:42px 1fr 48px}
+.set .n{font-family:var(--display);font-size:18px;color:var(--muted);text-align:center}
+.set .x{color:var(--muted);text-align:center}
+.set input{text-align:center;font-variant-numeric:tabular-nums;padding-inline:4px}
+.set .unit{position:relative}
+.set .unit input{padding-right:26px}
+.set .unit em{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-style:normal;font-size:12px;color:var(--muted);pointer-events:none}
+.tick{width:48px;height:44px;padding:0;border-radius:8px;font-size:20px;line-height:1}
+.tick[aria-pressed="true"]{background:var(--good);border-color:var(--good);color:#fff}
+.set.done input{border-color:color-mix(in srgb,var(--good) 50%,var(--line))}
+details summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:14px;list-style:none;min-height:32px;display:flex;align-items:center}
+details summary::-webkit-details-marker{display:none}
+details ul{margin:6px 0 0;padding-left:20px;color:var(--ink-2);font-size:15px;display:flex;flex-direction:column;gap:4px}
+
+.timer{position:fixed;left:0;right:0;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));z-index:6;padding:8px 16px;background:var(--ink);color:var(--bg)}
+.timer .wrap{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+.timer .clock{font-family:var(--display);font-size:30px;font-weight:700;font-variant-numeric:tabular-nums}
+.timer button{background:transparent;color:var(--bg);border-color:color-mix(in srgb,var(--bg) 35%,transparent);min-height:38px;padding:6px 12px}
+.timer.over{background:var(--good);color:#fff}.timer.over button{color:#fff;border-color:rgba(255,255,255,.5)}
+
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:7;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs .wrap{flex-direction:row;gap:0}
+nav.tabs button{flex:1;border:0;border-radius:0;background:transparent;color:var(--muted);min-height:var(--nav-h);flex-direction:column;gap:2px;font-size:13px;padding:6px 2px}
+nav.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs button[aria-current="page"]{color:var(--accent)}
+
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.stat b{display:block;font-family:var(--display);font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .gl{stroke:var(--line);stroke-width:1}
+.chart .ax{fill:var(--muted);font-size:12px;font-family:var(--body)}
+.chart .ln{fill:none;stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart .ar{fill:var(--accent);opacity:.12}
+.chart .pt{fill:var(--accent);stroke:var(--surface);stroke-width:2}
+.chart .pt.last{fill:var(--pr)}
+.chart .hit{fill:transparent;cursor:pointer}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:13px;padding:5px 8px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-115%)}
+.empty{color:var(--muted);font-size:15px;padding:18px;border:1px dashed var(--line);border-radius:8px;text-align:center}
+.hist{list-style:none;margin:0;padding:0}
+.hist li{padding:12px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.hist li:first-child{border-top:0}
+
+.meter{height:14px;border-radius:7px;background:var(--surface-2);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--accent);border-radius:7px;transition:width .3s}
+.meter.full i{background:var(--good)}
+.big{font-family:var(--display);font-size:44px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.quick{display:flex;flex-wrap:wrap;gap:8px}
+.quick button{min-height:40px;padding:6px 12px;font-weight:500;font-size:14px}
+.quick button b{color:var(--accent);font-weight:700}
+.eaten{list-style:none;margin:0;padding:0}
+.eaten li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 0;border-top:1px solid var(--line)}
+.eaten li:first-child{border-top:0}
+.eaten button{min-height:36px;padding:4px 10px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end}
+.days div{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
+.days .bar{width:100%;max-width:26px;height:70px;background:var(--surface-2);border-radius:4px;display:flex;align-items:flex-end;overflow:hidden}
+.days .bar i{display:block;width:100%;background:var(--accent);border-radius:4px 4px 0 0}
+.days .bar i.hit{background:var(--good)}
+.meal{padding:12px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
+.meal:first-of-type{border-top:0}
+.meal .row{justify-content:space-between}
+.meal b{font-weight:600}
+ul.tips{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;color:var(--ink-2)}
+ul.tips strong{color:var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.field{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--ink-2)}
+.confirm{background:var(--surface-2);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + 84px + env(safe-area-inset-bottom,0px));z-index:9;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-weight:500;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.25)}
+@media (max-width:380px){.stats{grid-template-columns:1fr 1fr}.set{grid-template-columns:34px 1fr 12px 1fr 44px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+
+<header class="top"><div class="wrap">
+  <div class="brand"><i aria-hidden="true"></i>Krachthuis</div>
+  <button class="chip" id="backupChip" type="button">Back-up</button>
+</div></header>
+
+<main><div class="wrap" id="view"></div></main>
+
+<div class="timer" id="timer" hidden><div class="wrap">
+  <div><div class="small" id="timerLabel">Rust</div><div class="clock" id="timerClock">0:00</div></div>
+  <div class="row"><button type="button" id="timerPlus">+15 s</button><button type="button" id="timerStop">Klaar</button></div>
+</div></div>
+
+<nav class="tabs" aria-label="Onderdelen"><div class="wrap">
+  <button type="button" data-tab="train"><svg viewBox="0 0 24 24"><path d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>Training</button>
+  <button type="button" data-tab="progress"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 16l4-5 4 3 6-8"/></svg>Voortgang</button>
+  <button type="button" data-tab="food"><svg viewBox="0 0 24 24"><path d="M7 3v8a2 2 0 0 0 4 0V3M9 11v10M17 3c-2 2-2 6 0 8v10"/></svg>Voeding</button>
+  <button type="button" data-tab="more"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></svg>Back-up</button>
+</div></nav>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+const KEY='krachthuis.v1';
+const EX={
+  bss:{name:'Bulgaarse split squat',kind:'db',sets:3,min:8,max:12,rest:90,side:true,cues:['Achterste voet op een stoel of bank, dumbbell in elke hand.','Zak recht naar beneden tot je achterste knie bijna de grond raakt.','Duw op door je voorste hiel; knie volgt de richting van je tenen.']},
+  ohp:{name:'Overhead press',kind:'bar',sets:3,min:6,max:10,rest:120,cues:['Stang op schouderhoogte, handen net buiten de schouders.','Billen en buik aanspannen, geen holle rug.','Druk recht omhoog; hoofd even naar achter, daarna onder de stang door.']},
+  pullup:{name:'Pull-ups',kind:'bw',sets:3,min:5,max:12,rest:120,cues:['Bovenhandse greep, iets breder dan de schouders.','Trek je borst naar de stang, schouderbladen naar beneden.','Lukt nog geen 5? Doe negatieven: spring omhoog en zak in 5 tellen.']},
+  bbrow:{name:'Voorovergebogen roeien',kind:'bar',sets:3,min:8,max:12,rest:90,cues:['Heupen naar achter, rug recht, bovenlichaam ongeveer 45°.','Trek de stang naar je navel, ellebogen langs je lichaam.','Gecontroleerd laten zakken, niet zwaaien.']},
+  pushup:{name:'Push-ups',kind:'bw',sets:3,min:8,max:20,rest:60,cues:['Handen iets breder dan de schouders, lichaam één rechte lijn.','Borst bijna tot de grond, ellebogen ongeveer 45° van je lichaam.','Te makkelijk? Voeten op een stoel.']},
+  plank:{name:'Plank',kind:'time',sets:3,min:30,max:60,rest:60,cues:['Op onderarmen, ellebogen onder de schouders.','Billen aanspannen en navel naar binnen.','Stop zodra je heupen gaan zakken.']},
+  rdl:{name:'Roemeense deadlift',kind:'bar',sets:3,min:8,max:10,rest:120,cues:['Knieën licht gebogen, stang dicht langs je benen.','Heupen naar achter tot je een flinke rek in je hamstrings voelt.','Rug blijft recht; kom omhoog door je heupen naar voren te duwen.']},
+  floor:{name:'Floor press',kind:'bar',sets:3,min:6,max:10,rest:120,cues:['Liggend op de grond, knieën gebogen, stang boven je borst.','Zak tot je bovenarmen de grond raken, even stil, dan omhoog.','Een bankdrukken zonder bank: sparend voor de schouders.']},
+  chinup:{name:'Chin-ups',kind:'bw',sets:3,min:5,max:12,rest:120,cues:['Onderhandse greep op schouderbreedte.','Kin boven de stang, gecontroleerd terug tot gestrekte armen.','Meer biceps dan bij pull-ups.']},
+  dbrow:{name:'Eenarmig roeien',kind:'db',sets:3,min:10,max:15,rest:75,side:true,cues:['Eén hand en knie op een stoel of bank, rug plat.','Trek de dumbbell naar je heup.','Onderaan even goed uitstrekken.']},
+  lunge:{name:'Walking lunges',kind:'db',sets:2,min:10,max:16,rest:90,cues:['Dumbbells naast je lichaam, grote stap vooruit.','Achterste knie bijna tot de grond.','Aantal = totaal aantal stappen.']},
+  knee:{name:'Hangend knieheffen',kind:'bw',sets:3,min:8,max:15,rest:60,cues:['Hang aan de stang, schouders actief.','Trek je knieën naar je borst en kantel je bekken.','Niet zwaaien; te makkelijk? Gestrekte benen.']},
+  dl:{name:'Deadlift',kind:'bar',sets:3,min:5,max:8,rest:150,cues:['Stang boven het midden van je voeten, schenen tegen de stang.','Borst op, rug recht, stang dicht bij je lichaam.','Duw de vloer weg; bovenaan rechtop staan, niet achterover hangen.']},
+  goblet:{name:'Goblet squat (3 tellen omlaag)',kind:'db',sets:3,min:12,max:20,rest:90,cues:['Eén dumbbell rechtop tegen je borst.','Zak in 3 tellen zo diep als je netjes kunt.','Ellebogen tussen je knieën, borst omhoog.']},
+  pike:{name:'Pike push-ups',kind:'bw',sets:3,min:6,max:12,rest:90,cues:['Handen op de grond, heupen hoog: omgekeerde V.','Laat je hoofd tussen je handen richting de grond zakken.','Zwaarder: voeten op een stoel.']},
+  lat:{name:'Zijwaarts heffen',kind:'db',sets:3,min:12,max:20,rest:60,cues:['Lichte dumbbells, armen licht gebogen.','Hef zijwaarts tot schouderhoogte, niet hoger.','Langzaam zakken, niet zwaaien.']},
+  curl:{name:'Biceps curl',kind:'bar',sets:3,min:8,max:12,rest:60,cues:['Stang op schouderbreedte, onderhandse greep.','Ellebogen blijven naast je lichaam.','Twee tellen omlaag.']}
+};
+const WO={
+  A:{focus:'Benen, schouders en rug',ex:['bss','ohp','pullup','bbrow','pushup','plank']},
+  B:{focus:'Achterkant benen, borst en rug',ex:['rdl','floor','chinup','dbrow','lunge','knee']},
+  C:{focus:'Deadlift, schouders en armen',ex:['dl','goblet','pike','pullup','lat','curl']}
+};
+const FOODS=[
+  ['Magere kwark 250 g',22],['3 eieren',19],['Kipfilet 150 g',34],['Tonijn, 1 blik',28],['Mager gehakt 125 g',26],['Zalm 125 g',25],
+  ['Skyr 150 g',16],['Eiwitshake',24],['Melk 250 ml',9],['2 sneetjes volkoren',9],['Kikkererwten 200 g',15],['Pindakaas 2 el',7]
+];
+
+let S=load();
+let tab='train';
+let pickWo=null;
+let confirmKey=null;
+let chartEx=null;
+let timer={end:0,iv:null,label:''};
+let storageOk=true;
+
+function def(){return{v:1,settings:{bw:null,maxBar:50,maxDb:15,barInc:2.5,dbInc:2},sessions:[],draft:null,protein:{},weights:[],lastBackup:null}}
+function load(){
+  try{const raw=localStorage.getItem(KEY);if(raw){const d=JSON.parse(raw);return Object.assign(def(),d,{settings:Object.assign(def().settings,d.settings||{})})}}catch(e){}
+  return def();
+}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(S));storageOk=true}catch(e){storageOk=false}
+  if(!save.p&&navigator.storage&&navigator.storage.persist){save.p=1;navigator.storage.persist().catch(()=>{})}
+}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>(Math.round(n*10)/10).toString().replace('.',',');
+const todayKey=()=>dkey(new Date());
+function dkey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function dnice(k){const d=new Date(k+'T12:00:00');return d.toLocaleDateString('nl-NL',{weekday:'short',day:'numeric',month:'short'})}
+function weekStart(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,2800)}
+function daysSince(ts){return ts?Math.floor((Date.now()-ts)/864e5):null}
+function hasData(){return S.sessions.length||S.weights.length||Object.keys(S.protein).length}
+
+
+function lastSets(id,beforeTs){
+  for(let i=S.sessions.length-1;i>=0;i--){const s=S.sessions[i];if(beforeTs&&s.ts>=beforeTs)continue;const e=s.entries.find(x=>x.ex===id);if(e&&e.sets.length)return e.sets}
+  return null;
+}
+function score(id,sets){const k=EX[id].kind;if(k==='bar'||k==='db')return Math.max(...sets.map(s=>(+s.w||0)*(1+(+s.r||0)/30)));return Math.max(...sets.map(s=>+s.r||0))}
+function suggest(id){
+  const e=EX[id],L=lastSets(id),unit=e.kind==='time'?' s':'';
+  if(e.kind==='bar'||e.kind==='db'){
+    if(!L)return{w:'',r:e.min,text:`Eerste keer: kies een gewicht waarmee je ${e.min}–${e.max} herhalingen haalt en er nog 1–2 over hebt.`};
+    const w=+L[0].w||0,top=L.length>=e.sets&&L.every(s=>+s.r>=e.max);
+    const inc=e.kind==='bar'?S.settings.barInc:S.settings.dbInc,cap=e.kind==='bar'?S.settings.maxBar:S.settings.maxDb;
+    if(top){const nw=Math.round((w+inc)*100)/100;
+      if(nw>cap)return{w,r:e.max,text:`Je zit aan je zwaarste ${e.kind==='bar'?'stang':'dumbbells'}. Maak het zwaarder door 3 tellen te zakken of een set toe te voegen.`};
+      return{w:nw,r:e.min,text:`Alle sets op ${e.max} gehaald. Gewicht omhoog naar ${fmt(nw)} kg, begin weer op ${e.min}.`,up:true}}
+    const low=Math.min(...L.map(s=>+s.r||0)),r=Math.min(e.max,low+1);
+    return{w,r,text:`Zelfde gewicht (${fmt(w)} kg). Probeer ${r} herhalingen in elke set.`};
+  }
+  if(!L)return{w:'',r:e.min,text:e.kind==='time'?`Houd ${e.min}–${e.max} seconden vol met goede houding.`:`Zoveel mogelijk nette herhalingen, stop met 1–2 over. Doel: ${e.min}–${e.max}.`};
+  const low=Math.min(...L.map(s=>+s.r||0)),step=e.kind==='time'?5:1;
+  if(L.length>=e.sets&&L.every(s=>+s.r>=e.max))return{w:'',r:e.max,text:e.kind==='time'?'Doel gehaald. Til één voet op of zet je ellebogen verder naar voren.':'Doel gehaald. Maak het zwaarder: rugzak met gewicht of 3 tellen zakken.'};
+  const r=Math.min(e.max,low+step);
+  return{w:'',r,text:`Vorige keer minimaal ${low}${unit}. Doel: ${r}${unit} in elke set.`};
+}
+function setsText(id,sets){const e=EX[id];if(!sets||!sets.length)return'';
+  if(e.kind==='bar'||e.kind==='db'){const ws=[...new Set(sets.map(s=>fmt(+s.w||0)))];return sets.map(s=>s.r).join(' / ')+' × '+ws.join('/')+' kg'}
+  return sets.map(s=>s.r).join(' / ')+(e.kind==='time'?' s':' herh.')}
+function nextWo(){const l=S.sessions[S.sessions.length-1];if(!l)return'A';return{A:'B',B:'C',C:'A'}[l.workout]||'A'}
+function thisWeekCount(){const ws=weekStart(new Date()).getTime();return S.sessions.filter(s=>s.ts>=ws).length}
+
+
+function backupBanner(){
+  const d=daysSince(S.lastBackup);
+  if(!S.sessions.length)return'';
+  if(d!==null&&d<7)return'';
+  return`<div class="banner"><div><strong>${d===null?'Nog geen back-up':'Laatste back-up '+d+' dagen geleden'}</strong><div class="small">Maak er een, dan ben je je trainingen niet kwijt als je browsergegevens wist.</div></div><button type="button" class="primary" data-act="backup">Back-up maken</button></div>`;
+}
+function vTrain(){
+  if(S.draft)return vSession();
+  const w=pickWo||nextWo(),W=WO[w],n=thisWeekCount();
+  const list=W.ex.map(id=>{const e=EX[id],sg=suggest(id);
+    const tgt=(e.kind==='bar'||e.kind==='db')?`${e.sets} × ${e.min}–${e.max}${sg.w!==''?' · '+fmt(sg.w)+' kg':''}`:`${e.sets} × ${e.min}–${e.max}${e.kind==='time'?' s':''}`;
+    return`<li><span class="t">${esc(e.name)}${e.side?' <span class="muted small">per kant</span>':''}</span><span class="s num">${tgt}</span></li>`}).join('');
+  return`${backupBanner()}
+  <section class="card">
+    <div class="row" style="gap:16px;flex-wrap:nowrap">
+      <div class="plate ${w}" aria-hidden="true">${w}</div>
+      <div class="stack" style="gap:4px">
+        <span class="label">${w===nextWo()?'Volgende training':'Gekozen training'}</span>
+        <h2>Training ${w}</h2>
+        <span class="muted">${W.focus} · ± 45 min</span>
+      </div>
+    </div>
+    <div class="seg" role="group" aria-label="Kies training">${['A','B','C'].map(x=>`<button type="button" data-act="pick" data-w="${x}" aria-pressed="${x===w}">${x}</button>`).join('')}</div>
+    <ul class="exlist">${list}</ul>
+    <button type="button" class="primary block" data-act="start" data-w="${w}">Start training ${w}</button>
+  </section>
+  <section class="card">
+    <div class="row between"><span class="label">Deze week</span><span class="num small muted">${n} van 3</span></div>
+    <div class="week">${[0,1,2].map(i=>`<span class="${i<n?'on':''}"></span>`).join('')}</div>
+    <p class="small muted">Train om de dag, bijvoorbeeld maandag, woensdag en vrijdag. A, B en C wisselen elkaar automatisch af.</p>
+  </section>
+  <section class="card">
+    <h3>Voor je begint</h3>
+    <ul class="tips">
+      <li><strong>Warming-up:</strong> 5 minuten bewegen, daarna 1–2 lichte sets van de eerste oefening.</li>
+      <li><strong>Hoe zwaar?</strong> Eindig elke set met 1–2 herhalingen over. Techniek gaat voor gewicht.</li>
+      <li><strong>Vooruitgang:</strong> haal je bij alle sets het bovenste getal, dan gaat het gewicht omhoog. De app rekent het voor je uit.</li>
+      <li><strong>Rustweek:</strong> neem elke 6–8 weken een week met de helft van de sets.</li>
+    </ul>
+  </section>`;
+}
+function vSession(){
+  const D=S.draft,W=WO[D.workout];
+  const cards=W.ex.map(id=>{const e=EX[id],sg=suggest(id),L=lastSets(id),rows=D.entries[id]||[];
+    const wt=e.kind==='bar'||e.kind==='db';
+    const sets=rows.map((s,i)=>`<div class="set ${wt?'':'bw'} ${s.done?'done':''}">
+      <span class="n">${i+1}</span>
+      ${wt?`<span class="unit"><input id="w-${id}-${i}" inputmode="decimal" aria-label="Gewicht set ${i+1}" data-f="w" data-ex="${id}" data-i="${i}" value="${s.w}"><em>kg</em></span><span class="x">×</span>`:''}
+      <span class="unit"><input id="r-${id}-${i}" inputmode="numeric" aria-label="${e.kind==='time'?'Seconden':'Herhalingen'} set ${i+1}" data-f="r" data-ex="${id}" data-i="${i}" value="${s.r}"><em>${e.kind==='time'?'s':'x'}</em></span>
+      <button type="button" class="tick" data-act="tick" data-ex="${id}" data-i="${i}" aria-pressed="${!!s.done}" aria-label="Set ${i+1} klaar">✓</button>
+    </div>`).join('');
+    return`<section class="card ex">
+      <div class="ex-head"><h3>${esc(e.name)}</h3><span class="tag num">${e.sets} × ${e.min}–${e.max}${e.kind==='time'?' s':''}${e.side?' p/k':''}</span></div>
+      <div class="hint">${esc(sg.text)}${L?`<div class="small muted">Vorige keer: ${esc(setsText(id,L))}</div>`:''}</div>
+      <div class="sets">${sets}</div>
+      <div class="row between">
+        <details><summary>Uitvoering</summary><ul>${e.cues.map(c=>`<li>${esc(c)}</li>`).join('')}<li><a href="https://www.youtube.com/results?search_query=${encodeURIComponent(e.name+' uitvoering')}" target="_blank" rel="noopener">Bekijk een video</a></li></ul></details>
+        <button type="button" class="ghost" data-act="addset" data-ex="${id}">+ Set</button>
+      </div>
+    </section>`}).join('');
+  const done=Object.values(D.entries).flat().filter(s=>s.done).length,total=Object.values(D.entries).flat().length;
+  return`<section class="row between"><div><span class="label">Bezig</span><h2>Training ${D.workout}</h2></div><span class="num muted">${done}/${total} sets</span></section>
+  ${cards}
+  <section class="card">
+    ${confirmKey==='discard'?`<div class="confirm"><b>Training weggooien?</b><span class="small muted">Wat je nu hebt ingevuld wordt niet bewaard.</span><div class="row"><button type="button" class="danger" data-act="discard-yes">Weggooien</button><button type="button" data-act="cancel">Terug</button></div></div>`:''}
+    <button type="button" class="primary block" data-act="finish">Training opslaan</button>
+    <button type="button" class="ghost" data-act="discard">Training weggooien</button>
+  </section>`;
+}
+function chartSVG(pts,unit){
+  if(pts.length<2)return`<div class="empty">${pts.length?'Na je volgende training verschijnt hier een lijn.':'Nog geen gegevens.'}</div>`;
+  const W=600,H=220,pl=44,pr=16,pt=14,pb=28;
+  const ys=pts.map(p=>p.y);let mn=Math.min(...ys),mx=Math.max(...ys);if(mn===mx){mn-=1;mx+=1}
+  const pad=(mx-mn)*.15;mn=Math.max(0,mn-pad);mx+=pad;
+  const nice=(mx-mn)/3,step=Math.pow(10,Math.floor(Math.log10(nice)));const st=[1,2,2.5,5,10].map(m=>m*step).find(s=>s>=nice)||nice;
+  mn=Math.floor(mn/st)*st;mx=Math.ceil(mx/st)*st;
+  const X=i=>pl+(W-pl-pr)*(i/(pts.length-1)),Y=v=>pt+(H-pt-pb)*(1-(v-mn)/(mx-mn));
+  let g='';for(let v=mn;v<=mx+1e-9;v+=st){g+=`<line class="gl" x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}"/><text class="ax" x="${pl-8}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`}
+  const d=pts.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' ');
+  const area=d+` L${X(pts.length-1)} ${H-pb} L${pl} ${H-pb} Z`;
+  const lab=[0,pts.length-1].map(i=>`<text class="ax" x="${X(i)}" y="${H-8}" text-anchor="${i?'end':'start'}">${esc(pts[i].x)}</text>`).join('');
+  const dots=pts.map((p,i)=>`<circle class="pt ${i===pts.length-1?'last':''}" cx="${X(i)}" cy="${Y(p.y)}" r="${i===pts.length-1?5.5:4}"/>`).join('');
+  const hits=pts.map((p,i)=>`<rect class="hit" x="${X(i)-(W-pl-pr)/(pts.length-1)/2}" y="0" width="${(W-pl-pr)/(pts.length-1)}" height="${H}" data-tip="${esc(p.x)}: ${fmt(p.y)}${unit}" data-cx="${X(i)/W}" data-cy="${Y(p.y)/H}"/>`).join('');
+  return`<div class="chart"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Verloop">${g}<path class="ar" d="${area}"/><path class="ln" d="${d}"/>${dots}${lab}${hits}</svg><div class="tip" hidden></div></div>`;
+}
+function vProgress(){
+  const used=[...new Set(S.sessions.flatMap(s=>s.entries.map(e=>e.ex)))];
+  if(!chartEx||!used.includes(chartEx))chartEx=used[0]||null;
+  const now=new Date(),mStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
+  const month=S.sessions.filter(s=>s.ts>=mStart).length;
+  let chart='<div class="empty">Sla je eerste training op om hier je vooruitgang te zien.</div>',cap='';
+  if(chartEx){const e=EX[chartEx];const pts=S.sessions.filter(s=>s.entries.some(x=>x.ex===chartEx&&x.sets.length)).map(s=>({x:dnice(s.date),y:score(chartEx,s.entries.find(x=>x.ex===chartEx).sets)}));
+    const wt=e.kind==='bar'||e.kind==='db';cap=wt?'Geschat maximum voor 1 herhaling (kg), berekend uit je beste set.':e.kind==='time'?'Langste set (seconden).':'Meeste herhalingen in één set.';
+    chart=chartSVG(pts,wt?' kg':e.kind==='time'?' s':' herh.')}
+  const bwPts=S.weights.slice(-30).map(w=>({x:dnice(w.date),y:w.kg}));
+  const hist=S.sessions.slice().reverse().slice(0,20).map(s=>`<li>
+    <div class="row between"><b>${dnice(s.date)} · Training ${s.workout}</b>${confirmKey==='del-'+s.id?`<span class="row"><button type="button" class="danger" data-act="del-yes" data-id="${s.id}">Verwijder</button><button type="button" data-act="cancel">Nee</button></span>`:`<button type="button" class="ghost small" data-act="del" data-id="${s.id}" aria-label="Verwijder training">Verwijder</button>`}</div>
+    <span class="small muted">${s.entries.map(e=>esc(EX[e.ex].name)+' '+esc(setsText(e.ex,e.sets))).join(' · ')}</span></li>`).join('');
+  return`${backupBanner()}
+  <div class="stats">
+    <div class="stat"><b>${S.sessions.length}</b><span>trainingen</span></div>
+    <div class="stat"><b>${month}</b><span>deze maand</span></div>
+    <div class="stat"><b>${thisWeekCount()}/3</b><span>deze week</span></div>
+  </div>
+  <section class="card">
+    <h3>Kracht per oefening</h3>
+    ${used.length?`<select id="exSel" aria-label="Oefening">${used.map(id=>`<option value="${id}" ${id===chartEx?'selected':''}>${esc(EX[id].name)}</option>`).join('')}</select>`:''}
+    ${chart}<p class="small muted">${cap}</p>
+  </section>
+  <section class="card">
+    <h3>Lichaamsgewicht</h3>
+    <p class="small muted">Weeg jezelf één keer per week, op hetzelfde moment (bijvoorbeeld zaterdagochtend).</p>
+    <div class="row" style="flex-wrap:nowrap"><input id="bwIn" inputmode="decimal" placeholder="kg" aria-label="Gewicht in kg"><button type="button" class="primary" data-act="addbw">Toevoegen</button></div>
+    ${chartSVG(bwPts,' kg')}
+  </section>
+  <section class="card"><h3>Geschiedenis</h3>${hist?`<ul class="hist">${hist}</ul>`:'<div class="empty">Nog geen trainingen.</div>'}</section>`;
+}
+function proteinTarget(){const bw=S.settings.bw;return bw?{lo:Math.round(bw*1.6),hi:Math.round(bw*2.2),t:Math.round(bw*1.8)}:null}
+function vFood(){
+  const k=todayKey(),items=S.protein[k]||[],sum=items.reduce((a,b)=>a+b.g,0),T=proteinTarget();
+  const pct=T?Math.min(100,sum/T.t*100):0;
+  const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const dk=dkey(d);const s=(S.protein[dk]||[]).reduce((a,b)=>a+b.g,0);days.push({l:d.toLocaleDateString('nl-NL',{weekday:'narrow'}),s,dk})}
+  const dmax=Math.max(T?T.t:0,...days.map(d=>d.s),1);
+  return`<section class="card">
+    <div class="row between"><h3>Eiwit vandaag</h3><span class="small muted">${dnice(k)}</span></div>
+    ${T?`<div class="row between" style="align-items:flex-end"><div><span class="big">${sum}</span><span class="muted"> / ${T.t} g</span></div><span class="small muted num">doel ${T.lo}–${T.hi} g</span></div>
+    <div class="meter ${sum>=T.t?'full':''}"><i style="width:${pct}%"></i></div>`
+    :`<p class="muted">Vul je gewicht in, dan rekent de app je eiwitdoel uit (1,6–2,2 gram per kilo lichaamsgewicht).</p>
+    <div class="row" style="flex-wrap:nowrap"><input id="bwSet" inputmode="decimal" placeholder="Gewicht in kg" aria-label="Lichaamsgewicht"><button type="button" class="primary" data-act="setbw">Opslaan</button></div>
+    <div><span class="big">${sum}</span><span class="muted"> g vandaag</span></div>`}
+    <span class="label">Snel toevoegen</span>
+    <div class="quick">${FOODS.map((f,i)=>`<button type="button" data-act="food" data-i="${i}">${esc(f[0])} <b>${f[1]}</b></button>`).join('')}</div>
+    <div class="row" style="flex-wrap:nowrap"><input id="fName" placeholder="Iets anders" aria-label="Omschrijving"><input id="fG" inputmode="numeric" placeholder="g" aria-label="Gram eiwit" style="max-width:80px"><button type="button" data-act="foodc">+</button></div>
+    ${items.length?`<ul class="eaten">${items.map((it,i)=>`<li><span>${esc(it.l)}</span><span class="row" style="flex-wrap:nowrap"><b class="num">${it.g} g</b><button type="button" data-act="fdel" data-i="${i}" aria-label="Verwijder ${esc(it.l)}">×</button></span></li>`).join('')}</ul>`:''}
+  </section>
+  <section class="card">
+    <h3>Afgelopen 7 dagen</h3>
+    <div class="days">${days.map(d=>`<div title="${d.s} g"><span class="num">${d.s||''}</span><div class="bar"><i class="${T&&d.s>=T.t?'hit':''}" style="height:${d.s/dmax*100}%"></i></div><span>${d.l}</span></div>`).join('')}</div>
+    ${T?`<p class="small muted">Groen = doel van ${T.t} g gehaald.</p>`:''}
+  </section>
+  <section class="card">
+    <h3>Zo eet je voor spierkracht</h3>
+    <ul class="tips">
+      <li><strong>Eiwit is de basis:</strong> ${T?`${T.lo}–${T.hi} g per dag voor jou`:'1,6–2,2 g per kilo lichaamsgewicht per dag'}. Verdeel het over 3–4 momenten van ${T?Math.round(S.settings.bw*0.4)+' g':'zo’n 30–40 g'}.</li>
+      <li><strong>Eet gewoon genoeg:</strong> geen bewust overschot. Stijgt je kracht een paar weken niet en daalt je gewicht, voeg dan een extra maaltijd of snack toe.</li>
+      <li><strong>Koolhydraten rond de training:</strong> havermout, rijst, aardappel of brood geven energie voor zware sets.</li>
+      <li><strong>Groente en fruit</strong> bij elke maaltijd, en drink genoeg water.</li>
+      <li><strong>Slaap 7–9 uur.</strong> Je spieren groeien tijdens het herstel, niet tijdens de training.</li>
+      <li><strong>Creatine monohydraat</strong> (3–5 g per dag) is het best onderzochte supplement voor kracht. Twijfel je vanwege je gezondheid, overleg dan met je huisarts.</li>
+    </ul>
+  </section>
+  <section class="card">
+    <h3>Maaltijdideeën</h3>
+    <p class="small muted">Snel, zonder kaas of romige sauzen.</p>
+    ${meals()}
+  </section>`;
+}
+function meals(){
+  const M=[
+    ['Ontbijt',[['Kwarkbowl','Magere kwark, havermout, banaan of bessen, handje noten',30,'3 min'],['Roerei op brood','3 eieren, 2 sneetjes volkoren, tomaat',28,'6 min'],['Overnight oats','Havermout, kwark en melk de avond ervoor mengen in een bakje',30,'2 min']]],
+    ['Lunch',[['Tonijnwrap','Tonijn, sla, tomaat, komkommer, salsa of mosterd',32,'5 min'],['Kip-rijstbak','Kip, rijst en wokgroente. Maak 4 bakjes in één keer',40,'25 min voor 4'],['Brood met kip en ei','Kipfilet als beleg plus een gekookt ei',25,'4 min']]],
+    ['Avondeten',[['Chili con carne','Mager gehakt, kidneybonen, tomaat en paprika. Grote pan, rest invriezen',40,'30 min'],['Zalm van de bakplaat','Zalm, krieltjes en broccoli samen in de oven',32,'25 min'],['Roerbak met rund of kip','Reepjes vlees, wokgroente, noedels en sojasaus',38,'15 min'],['Kipdijen uit de oven','Kipdijen, zoete aardappel, paprika en kruiden',35,'35 min']]],
+    ['Tussendoor',[['Kwark met fruit','250 g magere kwark',22,'1 min'],['Gekookte eieren','Kook er 6 tegelijk voor de hele week',13,'per 2'],['Eiwitshake','Na de training, met water of melk',24,'1 min'],['Edamame of beef jerky','Makkelijk mee te nemen',12,'0 min']]]
+  ];
+  return M.map(([t,list])=>`<span class="label" style="margin-top:6px">${t}</span><div>${list.map(m=>`<div class="meal"><div class="row"><b>${m[0]}</b><span class="small num" style="color:var(--accent);font-weight:600">± ${m[2]} g eiwit</span></div><span class="small muted">${m[1]} · ${m[3]}</span></div>`).join('')}</div>`).join('');
+}
+function vMore(){
+  const d=daysSince(S.lastBackup),st=S.settings;
+  return`<section class="card">
+    <h3>Back-up</h3>
+    <p class="${d===null||d>=7?'':'muted'}">${d===null?'Je hebt nog geen back-up gemaakt.':d===0?'Laatste back-up: vandaag.':`Laatste back-up: ${d} ${d===1?'dag':'dagen'} geleden.`}</p>
+    <p class="small muted">Je gegevens staan alleen in deze browser op dit apparaat. Wis je je browsergegevens, dan zijn ze weg. Deel daarom elke week een back-up naar Google Drive: tik op de knop hieronder en kies Drive. De app herinnert je eraan.</p>
+    <button type="button" class="primary block" data-act="backup">Back-up delen (bijv. naar Google Drive)</button>
+    <button type="button" class="block" data-act="download">Back-up downloaden</button>
+    <button type="button" class="block" data-act="copy">Kopieer als tekst</button>
+    <p class="small muted">Lukt delen of downloaden niet? Kopieer de tekst en plak die in een notitie of mail aan jezelf.</p>
+    <textarea id="copyBox" readonly hidden aria-label="Back-uptekst"></textarea>
+  </section>
+  <section class="card">
+    <h3>Terugzetten</h3>
+    <p class="small muted">Kies je back-upbestand of plak de tekst. Dit vervangt wat nu in de app staat.</p>
+    <input type="file" id="restoreFile" accept=".txt,.json,text/plain,application/json" aria-label="Back-upbestand">
+    <textarea id="restoreText" placeholder="Of plak hier de back-uptekst" aria-label="Back-uptekst plakken"></textarea>
+    ${confirmKey==='restore'?`<div class="confirm"><b>${esc(restorePending.summary)}</b><span class="small muted">Wat nu in de app staat, wordt vervangen.</span><div class="row"><button type="button" class="primary" data-act="restore-yes">Terugzetten</button><button type="button" data-act="cancel">Annuleren</button></div></div>`:`<button type="button" data-act="restore">Controleer back-up</button>`}
+  </section>
+  <section class="card">
+    <h3>Instellingen</h3>
+    <div class="grid2">
+      <label class="field">Lichaamsgewicht (kg)<input id="s-bw" inputmode="decimal" value="${st.bw??''}"></label>
+      <label class="field">Zwaarste stang (kg)<input id="s-maxBar" inputmode="decimal" value="${st.maxBar}"></label>
+      <label class="field">Zwaarste dumbbell (kg)<input id="s-maxDb" inputmode="decimal" value="${st.maxDb}"></label>
+      <label class="field">Stapgrootte stang (kg)<input id="s-barInc" inputmode="decimal" value="${st.barInc}"></label>
+      <label class="field">Stapgrootte dumbbell (kg)<input id="s-dbInc" inputmode="decimal" value="${st.dbInc}"></label>
+    </div>
+    <button type="button" data-act="savesettings">Instellingen opslaan</button>
+  </section>
+  <section class="card">
+    <h3>Alles wissen</h3>
+    ${confirmKey==='wipe'?`<div class="confirm"><b>Alle trainingen, gewichten en eiwitgegevens wissen?</b><span class="small muted">Dit kan niet ongedaan worden gemaakt, tenzij je een back-up hebt.</span><div class="row"><button type="button" class="danger" data-act="wipe-yes">Alles wissen</button><button type="button" data-act="cancel">Annuleren</button></div></div>`:`<button type="button" class="danger" data-act="wipe">Alles wissen</button>`}
+  </section>`;
+}
+
+
+function render(){
+  const v=$('#view');
+  v.innerHTML=tab==='train'?vTrain():tab==='progress'?vProgress():tab==='food'?vFood():vMore();
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===tab?'page':'false'));
+  const d=daysSince(S.lastBackup),chip=$('#backupChip');
+  if(!hasData()){chip.className='chip';chip.textContent='Lokaal opgeslagen'}
+  else if(d!==null&&d<7){chip.className='chip ok';chip.textContent=d===0?'Back-up vandaag':`Back-up ${d}d geleden`}
+  else{chip.className='chip late';chip.textContent=d===null?'Geen back-up':`Back-up ${d}d geleden`}
+  if(!storageOk)toast('Opslaan lukt niet in deze weergave. Maak een back-up.');
+}
+function go(t){tab=t;confirmKey=null;render();window.scrollTo(0,0)}
+
+
+function startTimer(sec,label){timer.end=Date.now()+sec*1000;timer.label=label;$('#timer').hidden=false;$('#timerLabel').textContent='Rust · '+label;tickTimer();clearInterval(timer.iv);timer.iv=setInterval(tickTimer,250)}
+function tickTimer(){const left=Math.round((timer.end-Date.now())/1000),t=$('#timer');const a=Math.abs(left);
+  $('#timerClock').textContent=(left<0?'+':'')+Math.floor(a/60)+':'+String(a%60).padStart(2,'0');
+  if(left<=0&&!t.classList.contains('over')){t.classList.add('over');$('#timerLabel').textContent='Volgende set';try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
+  if(left>0)t.classList.remove('over')}
+function stopTimer(){clearInterval(timer.iv);$('#timer').hidden=true;$('#timer').classList.remove('over')}
+
+
+function payload(){return JSON.stringify({app:'krachthuis',exported:new Date().toISOString(),data:Object.assign({},S,{draft:null})},null,1)}
+function markBackup(msg){S.lastBackup=Date.now();save();render();toast(msg)}
+async function doBackup(){
+  const name='krachthuis-backup-'+todayKey()+'.txt';
+  const file=new File([payload()],name,{type:'text/plain'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:'Krachthuis back-up'});markBackup('Back-up gedeeld.');return}
+    catch(e){if(e&&e.name==='AbortError'){toast('Back-up niet gedeeld.');return}}
+  }
+  doDownload();
+}
+function doDownload(){
+  try{const name='krachthuis-backup-'+todayKey()+'.txt',url=URL.createObjectURL(new Blob([payload()],{type:'text/plain'}));
+    const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);
+    markBackup('Back-up staat in je Downloads-map.')}
+  catch(e){tab='more';render();showCopy();toast('Downloaden lukt niet. Kopieer de tekst.')}
+}
+function showCopy(){const b=$('#copyBox');if(!b)return;b.hidden=false;b.value=payload();b.focus();b.select()}
+async function doCopy(){
+  const txt=payload();
+  try{await navigator.clipboard.writeText(txt);S.lastBackup=Date.now();save();render();toast('Gekopieerd. Plak het in een notitie of mail.')}
+  catch(e){showCopy();toast('Selecteer de tekst en kopieer hem zelf.')}
+}
+let restorePending=null;
+function parseBackup(txt){
+  const o=JSON.parse(txt);const d=o&&o.app==='krachthuis'?o.data:o;
+  if(!d||!Array.isArray(d.sessions))throw new Error('bad');
+  return d;
+}
+async function checkRestore(){
+  const f=$('#restoreFile').files[0];let txt=$('#restoreText').value.trim();
+  if(f)txt=await f.text();
+  if(!txt){toast('Kies eerst een bestand of plak de tekst.');return}
+  try{const d=parseBackup(txt);restorePending={d,summary:`Back-up met ${d.sessions.length} trainingen en ${(d.weights||[]).length} gewichtsmetingen gevonden.`};confirmKey='restore';render()}
+  catch(e){toast('Dit is geen geldige Krachthuis-back-up.')}
+}
+
+
+document.addEventListener('click',e=>{
+  const nb=e.target.closest('nav.tabs button');if(nb){go(nb.dataset.tab);return}
+  if(e.target.closest('#backupChip')){go('more');return}
+  if(e.target.closest('#timerStop')){stopTimer();return}
+  if(e.target.closest('#timerPlus')){timer.end+=15000;tickTimer();return}
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act,id=b.dataset.ex,i=+b.dataset.i;
+  switch(a){
+    case'pick':pickWo=b.dataset.w;render();break;
+    case'start':{const w=b.dataset.w,ent={};WO[w].ex.forEach(x=>{const sg=suggest(x);ent[x]=Array.from({length:EX[x].sets},()=>({w:sg.w===''?'':sg.w,r:sg.r,done:false}))});
+      S.draft={workout:w,date:todayKey(),started:Date.now(),entries:ent};pickWo=null;save();render();window.scrollTo(0,0);break}
+    case'tick':{const s=S.draft.entries[id][i];s.done=!s.done;save();render();if(s.done)startTimer(EX[id].rest,EX[id].name);break}
+    case'addset':{const arr=S.draft.entries[id],l=arr[arr.length-1]||{w:'',r:EX[id].min};arr.push({w:l.w,r:l.r,done:false});save();render();break}
+    case'finish':{const D=S.draft,entries=[];
+      Object.keys(D.entries).forEach(x=>{const sets=D.entries[x].filter(s=>s.done).map(s=>({w:s.w===''?'':+String(s.w).replace(',','.'),r:+s.r||0}));if(sets.length)entries.push({ex:x,sets})});
+      if(!entries.length){toast('Vink eerst de sets aan die je hebt gedaan.');break}
+      const prs=entries.filter(en=>{const k=EX[en.ex].kind;if(k!=='bar'&&k!=='db')return false;const prev=S.sessions.flatMap(s=>s.entries.filter(x=>x.ex===en.ex).map(x=>score(en.ex,x.sets)));return prev.length&&score(en.ex,en.sets)>Math.max(...prev)}).map(en=>EX[en.ex].name);
+      S.sessions.push({id:Date.now().toString(36),ts:Date.now(),date:D.date,workout:D.workout,entries});S.draft=null;save();stopTimer();tab='train';render();window.scrollTo(0,0);
+      toast(prs.length?'Opgeslagen. Nieuw record: '+prs.join(', '):'Training opgeslagen.');break}
+    case'discard':confirmKey='discard';render();break;
+    case'discard-yes':S.draft=null;confirmKey=null;save();stopTimer();render();break;
+    case'cancel':confirmKey=null;restorePending=null;render();break;
+    case'del':confirmKey='del-'+b.dataset.id;render();break;
+    case'del-yes':S.sessions=S.sessions.filter(s=>s.id!==b.dataset.id);confirmKey=null;save();render();toast('Training verwijderd.');break;
+    case'addbw':{const v=parseFloat($('#bwIn').value.replace(',','.'));if(!(v>30&&v<300)){toast('Vul je gewicht in kilo in.');break}
+      const k=todayKey();S.weights=S.weights.filter(w=>w.date!==k);S.weights.push({date:k,kg:v});S.weights.sort((x,y)=>x.date<y.date?-1:1);S.settings.bw=v;save();render();toast('Gewicht opgeslagen.');break}
+    case'setbw':{const v=parseFloat($('#bwSet').value.replace(',','.'));if(!(v>30&&v<300)){toast('Vul je gewicht in kilo in.');break}S.settings.bw=v;save();render();break}
+    case'food':{const f=FOODS[i],k=todayKey();(S.protein[k]=S.protein[k]||[]).push({l:f[0],g:f[1]});save();render();break}
+    case'foodc':{const g=parseInt($('#fG').value,10);if(!(g>0&&g<300)){toast('Vul het aantal gram eiwit in.');break}const k=todayKey();(S.protein[k]=S.protein[k]||[]).push({l:$('#fName').value.trim()||'Eigen invoer',g});save();render();break}
+    case'fdel':{const k=todayKey();S.protein[k].splice(i,1);if(!S.protein[k].length)delete S.protein[k];save();render();break}
+    case'backup':doBackup();break;
+    case'download':doDownload();break;
+    case'copy':doCopy();break;
+    case'restore':checkRestore();break;
+    case'restore-yes':{S=Object.assign(def(),restorePending.d,{settings:Object.assign(def().settings,restorePending.d.settings||{}),draft:null,lastBackup:Date.now()});restorePending=null;confirmKey=null;save();render();toast('Back-up teruggezet.');break}
+    case'savesettings':{const n=x=>{const v=parseFloat(($('#s-'+x).value||'').replace(',','.'));return isFinite(v)&&v>0?v:null};
+      const bw=n('bw');S.settings.bw=bw;['maxBar','maxDb','barInc','dbInc'].forEach(x=>{const v=n(x);if(v)S.settings[x]=v});save();render();toast('Instellingen opgeslagen.');break}
+    case'wipe':confirmKey='wipe';render();break;
+    case'wipe-yes':S=def();confirmKey=null;save();stopTimer();render();toast('Alles gewist.');break;
+  }
+});
+document.addEventListener('input',e=>{
+  const t=e.target;if(t.dataset&&t.dataset.f&&S.draft){const s=S.draft.entries[t.dataset.ex][+t.dataset.i];s[t.dataset.f]=t.value.replace(',','.');save()}
+});
+document.addEventListener('change',e=>{if(e.target.id==='exSel'){chartEx=e.target.value;render()}});
+function showTip(r){const c=r.closest('.chart'),tip=c.querySelector('.tip'),svg=c.querySelector('svg').getBoundingClientRect();
+  tip.textContent=r.dataset.tip;tip.hidden=false;tip.style.left=(+r.dataset.cx*svg.width)+'px';tip.style.top=(+r.dataset.cy*svg.height)+'px'}
+document.addEventListener('pointerover',e=>{const r=e.target.closest('.hit');if(r)showTip(r)});
+document.addEventListener('pointerout',e=>{const r=e.target.closest('.hit');if(r){const tip=r.closest('.chart').querySelector('.tip');tip.hidden=true}});
+document.addEventListener('pointerdown',e=>{const r=e.target.closest('.hit');if(r)showTip(r)});
+
+render();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+})();
+</script>
+</body>
+</html>
