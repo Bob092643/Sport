@@ -174,6 +174,9 @@ button.inline{min-height:0;padding:0 4px;display:inline;font-size:inherit}
 .timer.hold{background:var(--accent);color:var(--accent-ink)}
 .timer.hold button{color:var(--accent-ink);border-color:color-mix(in srgb,var(--accent-ink) 40%,transparent)}
 @media (max-width:380px){.duo{grid-template-columns:1fr}.custom{grid-template-columns:1fr 60px 60px 44px}}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;background:var(--good);vertical-align:middle}
+.dot.late{background:var(--warn)}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:17px;letter-spacing:.04em;background:var(--surface-2);border-radius:8px;padding:10px 12px;word-break:break-all;user-select:all}
 </style>
 </head>
 <body>
@@ -200,6 +203,7 @@ button.inline{min-height:0;padding:0 4px;display:inline;font-size:inherit}
 
 <div class="toast" id="toast" hidden></div>
 
+<script src="firebase-config.js"></script>
 <script>
 (function(){
 const KEY='krachthuis.v1';
@@ -253,12 +257,124 @@ let S=load();
 let tab='train',pickWo=null,confirmKey=null,chartEx=null,swapOpen=null,restorePending=null,storageOk=true;
 let timer={mode:null,end:0,iv:null,onDone:null};
 
+const SKEY='krachthuis.sync';
+const FB_VER='10.12.2';
+let M=loadMeta(),fb=null,fbLoading=null,syncBusy=false,syncErr=false,pushT=null,cloudPending=null,showCode=false;
+function loadMeta(){try{return JSON.parse(localStorage.getItem(SKEY)||'{}')||{}}catch(e){return{}}}
+function saveMeta(){try{localStorage.setItem(SKEY,JSON.stringify(M))}catch(e){}}
+function cloudCfg(){const c=window.KRACHTHUIS_FIREBASE;return c&&c.apiKey&&c.projectId?c:null}
+function cloudOn(){return !!(M.code&&cloudCfg())}
+function dataJson(){return JSON.stringify(Object.assign({},S,{draft:null}))}
+function hash(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)+':'+str.length}
+function newCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',b=new Uint8Array(24);crypto.getRandomValues(b);return Array.from(b,x=>A[x%A.length]).join('')}
+function cleanCode(v){return String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'')}
+function prettyCode(c){return c.match(/.{1,4}/g).join('-')}
+function loadScript(src){return new Promise((ok,no)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s)})}
+function getDb(){
+  if(fb)return Promise.resolve(fb);
+  if(!fbLoading)fbLoading=(async()=>{
+    if(!window.firebase||!window.firebase.firestore){await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app-compat.js`);await loadScript(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-firestore-compat.js`)}
+    const app=(window.firebase.apps||[]).find(a=>a.name==='krachthuis')||window.firebase.initializeApp(cloudCfg(),'krachthuis');
+    fb=app.firestore();return fb;
+  })().catch(e=>{fbLoading=null;throw e});
+  return fbLoading;
+}
+const docRef=(db,code)=>db.collection('krachthuis').doc(code);
+function noteChange(){
+  if(!cloudOn())return;
+  const h=hash(dataJson());if(h===M.pushed)return;
+  M.dirty=true;M.modified=Date.now();saveMeta();
+  clearTimeout(pushT);pushT=setTimeout(push,1500);
+}
+async function push(){
+  if(!cloudOn()||!M.dirty||syncBusy)return;
+  if(navigator.onLine===false){syncErr=true;renderChip();return}
+  syncBusy=true;renderChip();
+  try{const db=await getDb(),j=dataJson();await docRef(db,M.code).set({data:j,updatedAt:M.modified||Date.now(),v:1});
+    M.pushed=hash(j);M.dirty=hash(dataJson())!==M.pushed;M.synced=Date.now();saveMeta();syncErr=false}
+  catch(e){syncErr=e&&e.code==='permission-denied'?'rules':true}
+  syncBusy=false;renderChip();if(M.dirty&&!syncErr){clearTimeout(pushT);pushT=setTimeout(push,1500)}
+}
+async function pull(){
+  if(!cloudOn()||syncBusy)return;
+  if(navigator.onLine===false){syncErr=true;renderChip();return}
+  syncBusy=true;renderChip();
+  try{const db=await getDb(),snap=await docRef(db,M.code).get();syncErr=false;syncBusy=false;
+    if(!snap.exists){M.dirty=true;saveMeta();push();return}
+    const r=snap.data(),rh=hash(r.data);
+    if(rh===hash(dataJson())){M.pushed=rh;M.dirty=false;M.synced=Date.now();saveMeta()}
+    else if((r.updatedAt||0)>(M.modified||0)&&!M.dirty){applyRemote(r)}
+    else if((r.updatedAt||0)>(M.modified||0)){applyRemote(r);toast('Nieuwere gegevens uit de cloud geladen.')}
+    else{M.dirty=true;saveMeta();push()}
+  }catch(e){syncErr=e&&e.code==='permission-denied'?'rules':true;syncBusy=false}
+  renderChip();
+}
+function applyRemote(r){
+  const d=normalize(JSON.parse(r.data)),draft=S.draft;S=d;S.draft=draft;
+  try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}
+  M.pushed=hash(r.data);M.dirty=false;M.modified=r.updatedAt||Date.now();M.synced=Date.now();saveMeta();render();
+}
+async function cloudEnable(){
+  if(!cloudCfg()){toast('Cloud-opslag is nog niet ingesteld.');return}
+  M={code:newCode(),dirty:true,modified:Date.now()};saveMeta();showCode=true;render();
+  await push();render();
+  toast(syncErr==='rules'?'Code gemaakt, maar de cloud weigert. Controleer de Firestore-regels.':syncErr?'Code gemaakt. Opslaan lukt zodra je online bent.':'Cloud-opslag staat aan.');
+}
+async function cloudCheck(){
+  const code=cleanCode($('#cloudCode').value);
+  if(code.length<20){toast('Die code is te kort. Controleer hem nog eens.');return}
+  try{const db=await getDb(),snap=await docRef(db,code).get();
+    if(!snap.exists){toast('Geen gegevens gevonden bij deze code.');return}
+    const r=snap.data(),d=JSON.parse(r.data);
+    cloudPending={code,r,summary:`Gevonden: ${(d.sessions||[]).length} trainingen en ${(d.weights||[]).length} gewichtsmetingen.`};confirmKey='cloud';render();
+  }catch(e){toast(e&&e.code==='permission-denied'?'Geen toegang. Controleer de Firestore-regels.':'De cloud is niet bereikbaar. Ben je online?')}
+}
+function cloudConnect(){const p=cloudPending;M={code:p.code};saveMeta();applyRemote(p.r);cloudPending=null;confirmKey=null;render();toast('Verbonden. Je gegevens zijn geladen.')}
+function cloudOff(){M={};saveMeta();confirmKey=null;showCode=false;render();toast('Cloud-opslag staat uit op dit apparaat.')}
+async function cloudDelete(){
+  try{const db=await getDb();await docRef(db,M.code).delete();cloudOff();toast('Cloudgegevens verwijderd. Je gegevens staan nog op dit apparaat.')}
+  catch(e){toast('Verwijderen lukt niet. Ben je online?')}
+}
+function ago(ts){if(!ts)return'nog niet';const m=Math.round((Date.now()-ts)/6e4);return m<1?'net':m<60?m+' min geleden':m<1440?Math.round(m/60)+' uur geleden':Math.round(m/1440)+' dagen geleden'}
+function cloudCard(){
+  if(!cloudCfg())return'';
+  if(!M.code)return`<section class="card">
+    <h3>Automatisch opslaan</h3>
+    <p class="small muted">Zet cloud-opslag aan en de app bewaart na elke wijziging een kopie in de cloud. Je krijgt een persoonlijke code. Met die code haal je alles terug op een nieuwe telefoon of na het wissen van je browser. Een back-up maken is dan niet meer nodig.</p>
+    <button type="button" class="primary block" data-act="cloud-on">Cloud-opslag aanzetten</button>
+    <span class="label" style="margin-top:6px">Al een code?</span>
+    <div class="row" style="flex-wrap:nowrap"><input id="cloudCode" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" aria-label="Je code"><button type="button" data-act="cloud-check">Verbinden</button></div>
+    ${confirmKey==='cloud'&&cloudPending?`<div class="confirm"><b>${esc(cloudPending.summary)}</b><span class="small muted">Deze gegevens vervangen wat nu op dit apparaat staat.</span><div class="row"><button type="button" class="primary" data-act="cloud-connect">Verbinden en laden</button><button type="button" data-act="cancel">Annuleren</button></div></div>`:''}
+  </section>`;
+  const st=syncBusy?'Bezig met opslaan…':syncErr==='rules'?'Geen toegang tot de cloud. Controleer of de Firestore-regels voor Krachthuis zijn gepubliceerd.':syncErr?'Niet bereikbaar. Wordt opnieuw geprobeerd zodra je online bent.':M.dirty?'Wijzigingen wachten op opslaan.':'Alles opgeslagen · '+ago(M.synced);
+  return`<section class="card">
+    <h3>Automatisch opslaan</h3>
+    <p class="${syncErr?'':'muted'}"><span class="dot ${syncErr?'late':'ok'}"></span>${st}</p>
+    <span class="label">Jouw code</span>
+    <div class="code num">${showCode?prettyCode(M.code):'••••-••••-••••-••••-••••-'+M.code.slice(-4)}</div>
+    <div class="row"><button type="button" data-act="cloud-show">${showCode?'Verbergen':'Tonen'}</button><button type="button" data-act="cloud-copy">Kopieer code</button></div>
+    <p class="small muted">Bewaar deze code goed, bijvoorbeeld in je wachtwoordmanager. Zonder code kun je je gegevens niet terughalen. Deel hem met niemand: wie de code heeft, kan je gegevens zien.</p>
+    ${confirmKey==='cloud-off'?`<div class="confirm"><b>Cloud-opslag uitzetten op dit apparaat?</b><span class="small muted">De gegevens in de cloud blijven bewaard. Met je code kun je later weer verbinden.</span><div class="row"><button type="button" class="danger" data-act="cloud-off-yes">Uitzetten</button><button type="button" data-act="cancel">Annuleren</button></div></div>`
+    :confirmKey==='cloud-del'?`<div class="confirm"><b>Gegevens uit de cloud verwijderen?</b><span class="small muted">Op dit apparaat blijft alles staan. De code werkt daarna niet meer.</span><div class="row"><button type="button" class="danger" data-act="cloud-del-yes">Verwijderen</button><button type="button" data-act="cancel">Annuleren</button></div></div>`
+    :`<div class="row"><button type="button" data-act="cloud-off">Uitzetten</button><button type="button" class="danger" data-act="cloud-del">Cloudgegevens verwijderen</button></div>`}
+  </section>`;
+}
+function renderChip(){
+  const chip=$('#backupChip');if(!chip)return;
+  if(cloudOn()){chip.className='chip '+(syncErr?'late':'ok');chip.textContent=syncBusy?'Opslaan…':syncErr?'Cloud offline':M.dirty?'Opslaan…':'Opgeslagen';return}
+  const d=daysSince(S.lastBackup);
+  if(!hasData()){chip.className='chip';chip.textContent='Lokaal opgeslagen'}
+  else if(d!==null&&d<7){chip.className='chip ok';chip.textContent=d===0?'Back-up vandaag':`Back-up ${d}d geleden`}
+  else{chip.className='chip late';chip.textContent=d===null?'Geen back-up':`Back-up ${d}d geleden`}
+}
+window.addEventListener('online',()=>{if(cloudOn()){syncErr=false;M.dirty?push():pull()}});
 function def(){return{v:1,settings:{bw:null,maxBar:50,maxDb:15,barInc:2.5,dbInc:2,sex:'m',age:null,height:null,act:1.55,sound:true},sessions:[],draft:null,protein:{},weights:[],lastBackup:null,swaps:{},deload:{until:null,lastEnd:null,snooze:null}}}
 function normalize(d){const b=def();return Object.assign(b,d,{settings:Object.assign(b.settings,d.settings||{}),swaps:Object.assign({},d.swaps||{}),deload:Object.assign(b.deload,d.deload||{})})}
 function load(){try{const raw=localStorage.getItem(KEY);if(raw)return normalize(JSON.parse(raw))}catch(e){}return def()}
 function save(){
   try{localStorage.setItem(KEY,JSON.stringify(S));storageOk=true}catch(e){storageOk=false}
   if(!save.p&&navigator.storage&&navigator.storage.persist){save.p=1;navigator.storage.persist().catch(()=>{})}
+  noteChange();
 }
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -328,7 +444,7 @@ function proteinTarget(){const bw=S.settings.bw;return bw?{lo:Math.round(bw*1.6)
 
 function backupBanner(){
   const d=daysSince(S.lastBackup);
-  if(!S.sessions.length||(d!==null&&d<7))return'';
+  if(cloudOn()||!S.sessions.length||(d!==null&&d<7))return'';
   return`<div class="banner"><div><strong>${d===null?'Nog geen back-up':'Laatste back-up '+d+' dagen geleden'}</strong><div class="small">Maak er een, dan ben je je trainingen niet kwijt als je browsergegevens wist.</div></div><button type="button" class="primary" data-act="backup">Back-up maken</button></div>`;
 }
 function deloadCard(){
@@ -519,8 +635,8 @@ function meals(){
 }
 function vMore(){
   const d=daysSince(S.lastBackup),st=S.settings,K=kcalTarget();
-  return`<section class="card">
-    <h3>Back-up</h3>
+  return`${cloudCard()}<section class="card">
+    <h3>${cloudOn()?'Extra back-up':'Back-up'}</h3>
     <p>${d===null?'Je hebt nog geen back-up gemaakt.':d===0?'Laatste back-up: vandaag.':`Laatste back-up: ${d} ${d===1?'dag':'dagen'} geleden.`}</p>
     <p class="small muted">Je gegevens staan alleen in deze browser op dit apparaat. Wis je je browsergegevens, dan zijn ze weg. Deel daarom elke week een back-up naar Google Drive: tik op de knop hieronder en kies Drive. De app herinnert je eraan.</p>
     <button type="button" class="primary block" data-act="backup">Back-up delen (bijv. naar Google Drive)</button>
@@ -569,10 +685,7 @@ function vMore(){
 function render(){
   $('#view').innerHTML=tab==='train'?vTrain():tab==='progress'?vProgress():tab==='food'?vFood():vMore();
   document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===tab?'page':'false'));
-  const d=daysSince(S.lastBackup),chip=$('#backupChip');
-  if(!hasData()){chip.className='chip';chip.textContent='Lokaal opgeslagen'}
-  else if(d!==null&&d<7){chip.className='chip ok';chip.textContent=d===0?'Back-up vandaag':`Back-up ${d}d geleden`}
-  else{chip.className='chip late';chip.textContent=d===null?'Geen back-up':`Back-up ${d}d geleden`}
+  renderChip();
   if(!storageOk)toast('Opslaan lukt niet in deze browser. Maak een back-up.');
   syncWake();
 }
@@ -679,7 +792,7 @@ document.addEventListener('click',e=>{
     case'sug-no':{(S.draft.sug=S.draft.sug||{})[id]='no';save();render();break}
     case'sound':S.settings.sound=!S.settings.sound;save();render();if(S.settings.sound){unlockAudio();beep()}break;
     case'discard-yes':{const ed=S.draft&&S.draft.editId;S.draft=null;confirmKey=null;save();stopTimer();tab=ed?'progress':'train';render();break}
-    case'cancel':confirmKey=null;restorePending=null;render();break;
+    case'cancel':confirmKey=null;restorePending=null;cloudPending=null;render();break;
     case'edit':{if(S.draft){toast('Rond eerst je lopende training af.');break}
       const s=S.sessions.find(x=>x.id===b.dataset.id);if(!s)break;const ent={};s.entries.forEach(en=>ent[en.ex]=en.sets.map(x=>({w:x.w,r:x.r,done:true})));
       S.draft={workout:s.workout,date:s.date,editId:s.id,slots:s.entries.map(en=>({orig:en.ex,cur:en.ex})),entries:ent,deload:!!s.deload};save();tab='train';render();window.scrollTo(0,0);break}
@@ -705,7 +818,16 @@ document.addEventListener('click',e=>{
     case'deload-snooze':S.deload.snooze=addDays(todayKey(),7);save();render();break;
     case'deload-stop':S.deload.until=null;S.deload.lastEnd=todayKey();save();render();break;
     case'wipe':confirmKey='wipe';render();break;
-    case'wipe-yes':S=def();confirmKey=null;save();stopTimer();render();toast('Alles gewist.');break;
+    case'wipe-yes':{const was=cloudOn();M={};saveMeta();S=def();confirmKey=null;save();stopTimer();render();toast(was?'Alles gewist op dit apparaat. De cloudgegevens blijven bewaard.':'Alles gewist.');break}
+    case'cloud-on':cloudEnable();break;
+    case'cloud-check':cloudCheck();break;
+    case'cloud-connect':cloudConnect();break;
+    case'cloud-show':showCode=!showCode;render();break;
+    case'cloud-copy':{const c=prettyCode(M.code);navigator.clipboard.writeText(c).then(()=>toast('Code gekopieerd.'),()=>{showCode=true;render();toast('Selecteer de code en kopieer hem zelf.')});break}
+    case'cloud-off':confirmKey='cloud-off';render();break;
+    case'cloud-off-yes':cloudOff();break;
+    case'cloud-del':confirmKey='cloud-del';render();break;
+    case'cloud-del-yes':cloudDelete();break;
   }
 });
 document.addEventListener('input',e=>{
@@ -721,6 +843,8 @@ document.addEventListener('pointerdown',e=>{const r=e.target.closest('.hit');if(
 
 if(S.draft&&!S.draft.slots){const w=S.draft.workout;S.draft.slots=Object.keys(S.draft.entries).map(x=>({orig:x,cur:x}));if(!WO[w])S.draft=null}
 render();
+pull();
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&cloudOn())M.dirty?push():pull()});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();
 </script>
