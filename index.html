@@ -179,6 +179,9 @@ button.inline{min-height:0;padding:0 4px;display:inline;font-size:inherit}
 .code{font-family:ui-monospace,Menlo,monospace;font-size:17px;letter-spacing:.04em;background:var(--surface-2);border-radius:8px;padding:10px 12px;word-break:break-all;user-select:all}
 .keep{gap:8px;font-size:15px}
 .keep input{width:20px;min-height:20px;height:20px}
+.myf{display:inline-flex}
+.myf button:first-child{border-top-right-radius:0;border-bottom-right-radius:0}
+.myf .x{border-left:0;border-top-left-radius:0;border-bottom-left-radius:0;min-height:40px;padding:6px 10px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -203,7 +206,7 @@ button.inline{min-height:0;padding:0 4px;display:inline;font-size:inherit}
   <button type="button" data-tab="more"><svg viewBox="0 0 24 24"><path stroke-width="4" d="M5 12h.01M12 12h.01M19 12h.01"/></svg>Meer</button>
 </div></nav>
 
-<div class="toast" id="toast" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script src="firebase-config.js"></script>
 <script>
@@ -212,13 +215,13 @@ const KEY='krachthuis.v1';
 const EX={
   bss:{name:'Bulgaarse split squat',kind:'db',sets:3,min:8,max:12,rest:90,side:true,cues:['Achterste voet op een stoel of bank, dumbbell in elke hand.','Zak recht naar beneden tot je achterste knie bijna de grond raakt.','Duw op door je voorste hiel; knie volgt de richting van je tenen.']},
   ohp:{name:'Overhead press',kind:'bar',sets:3,min:6,max:10,rest:120,cues:['Stang op schouderhoogte, handen net buiten de schouders.','Billen en buik aanspannen, geen holle rug.','Druk recht omhoog; hoofd even naar achter, daarna onder de stang door.']},
-  pullup:{name:'Pull-ups',kind:'bw',sets:3,min:5,max:12,rest:120,cues:['Bovenhandse greep, iets breder dan de schouders.','Trek je borst naar de stang, schouderbladen naar beneden.','Lukt nog geen 5? Wissel naar negatieve pull-ups.']},
+  pullup:{name:'Pull-ups',kind:'bw',load:true,sets:3,min:5,max:12,rest:120,cues:['Bovenhandse greep, iets breder dan de schouders.','Trek je borst naar de stang, schouderbladen naar beneden.','Lukt nog geen 5? Wissel naar negatieve pull-ups.']},
   bbrow:{name:'Voorovergebogen roeien',kind:'bar',sets:3,min:8,max:12,rest:90,cues:['Heupen naar achter, rug recht, bovenlichaam ongeveer 45°.','Trek de stang naar je navel, ellebogen langs je lichaam.','Gecontroleerd laten zakken, niet zwaaien.']},
-  pushup:{name:'Push-ups',kind:'bw',sets:3,min:8,max:20,rest:60,cues:['Handen iets breder dan de schouders, lichaam één rechte lijn.','Borst bijna tot de grond, ellebogen ongeveer 45° van je lichaam.','Te makkelijk? Voeten op een stoel.']},
+  pushup:{name:'Push-ups',kind:'bw',load:true,sets:3,min:8,max:20,rest:60,cues:['Handen iets breder dan de schouders, lichaam één rechte lijn.','Borst bijna tot de grond, ellebogen ongeveer 45° van je lichaam.','Te makkelijk? Voeten op een stoel.']},
   plank:{name:'Plank',kind:'time',sets:3,min:30,max:60,rest:60,cues:['Op onderarmen, ellebogen onder de schouders.','Billen aanspannen en navel naar binnen.','Stop zodra je heupen gaan zakken.']},
   rdl:{name:'Roemeense deadlift',kind:'bar',sets:3,min:8,max:10,rest:120,cues:['Knieën licht gebogen, stang dicht langs je benen.','Heupen naar achter tot je een flinke rek in je hamstrings voelt.','Rug blijft recht; kom omhoog door je heupen naar voren te duwen.']},
   floor:{name:'Floor press',kind:'bar',sets:3,min:6,max:10,rest:120,cues:['Liggend op de grond, knieën gebogen, stang boven je borst.','Zak tot je bovenarmen de grond raken, even stil, dan omhoog.','Een bankdrukken zonder bank: sparend voor de schouders.']},
-  chinup:{name:'Chin-ups',kind:'bw',sets:3,min:5,max:12,rest:120,cues:['Onderhandse greep op schouderbreedte.','Kin boven de stang, gecontroleerd terug tot gestrekte armen.','Meer biceps dan bij pull-ups.']},
+  chinup:{name:'Chin-ups',kind:'bw',load:true,sets:3,min:5,max:12,rest:120,cues:['Onderhandse greep op schouderbreedte.','Kin boven de stang, gecontroleerd terug tot gestrekte armen.','Meer biceps dan bij pull-ups.']},
   dbrow:{name:'Eenarmig roeien',kind:'db',sets:3,min:10,max:15,rest:75,side:true,cues:['Eén hand en knie op een stoel of bank, rug plat.','Trek de dumbbell naar je heup.','Onderaan even goed uitstrekken.']},
   lunge:{name:'Walking lunges',kind:'db',sets:2,min:10,max:16,rest:90,cues:['Dumbbells naast je lichaam, grote stap vooruit.','Achterste knie bijna tot de grond.','Aantal = totaal aantal stappen.']},
   knee:{name:'Hangend knieheffen',kind:'bw',sets:3,min:8,max:15,rest:60,cues:['Hang aan de stang, schouders actief.','Trek je knieën naar je borst en kantel je bekken.','Niet zwaaien; te makkelijk? Gestrekte benen.']},
@@ -230,7 +233,7 @@ const EX={
   stepup:{name:'Step-ups',kind:'db',sets:3,min:8,max:12,rest:90,side:true,cues:['Stevige stoel of traptree, dumbbell in elke hand.','Zet je hele voet neer en duw op door die hiel.','Gecontroleerd terug naar beneden.']},
   revlunge:{name:'Achterwaartse lunges',kind:'db',sets:3,min:8,max:12,rest:90,side:true,cues:['Stap naar achteren in plaats van naar voren.','Voorste knie blijft boven je voet.','Vaak prettiger voor de knieën.']},
   dbpress:{name:'Schouderdrukken met dumbbells',kind:'db',sets:3,min:8,max:12,rest:90,cues:['Zittend of staand, dumbbells op schouderhoogte.','Druk omhoog tot je armen bijna gestrekt zijn.','Geen holle rug.']},
-  negpull:{name:'Negatieve pull-ups',kind:'bw',sets:3,min:3,max:6,rest:120,cues:['Spring of stap omhoog tot je kin boven de stang is.','Zak in 5 tellen tot gestrekte armen.','Lukt 3 × 6? Probeer weer gewone pull-ups.']},
+  negpull:{name:'Negatieve pull-ups',kind:'bw',load:true,sets:3,min:3,max:6,rest:120,cues:['Spring of stap omhoog tot je kin boven de stang is.','Zak in 5 tellen tot gestrekte armen.','Lukt 3 × 6? Probeer weer gewone pull-ups.']},
   invrow:{name:'Tafelroeien',kind:'bw',sets:3,min:8,max:15,rest:90,cues:['Lig onder een stevige tafel en pak de rand vast.','Lichaam recht, trek je borst naar de tafel.','Zwaarder: voeten verder naar voren.']},
   dbfloor:{name:'Floor press met dumbbells',kind:'db',sets:3,min:8,max:12,rest:90,cues:['Liggend op de grond, dumbbells boven je borst.','Zak tot je bovenarmen de grond raken.','Druk samen omhoog.']},
   sideplank:{name:'Zijplank',kind:'time',sets:3,min:20,max:45,rest:45,side:true,cues:['Op één onderarm, elleboog onder je schouder.','Heupen omhoog, lichaam één lijn.','Eerst de ene kant, dan de andere.']},
@@ -275,6 +278,11 @@ const FOODS=[
 const ACT=[[1.2,'Zittend werk, weinig beweging'],[1.375,'Licht actief'],[1.55,'Matig actief (3× per week sporten)'],[1.725,'Zeer actief']];
 
 let S=load();
+function compactFood(){
+  const lim=addDays(todayKey(),-60);let ch=false;
+  Object.keys(S.protein).forEach(k=>{const l=S.protein[k];if(k<lim&&Array.isArray(l)&&!(l.length===1&&l[0].sum)){S.protein[k]=[{l:'Dagtotaal',g:l.reduce((a,b)=>a+(+b.g||0),0),k:l.reduce((a,b)=>a+(+b.k||0),0),sum:true}];ch=true}});
+  return ch;
+}
 let tab='train',pickWo=null,confirmKey=null,chartEx=null,swapOpen=null,restorePending=null,storageOk=true;
 let timer={mode:null,end:0,iv:null,onDone:null};
 
@@ -301,8 +309,19 @@ function getDb(){
   return fbLoading;
 }
 const docRef=(db,code)=>db.collection('krachthuis').doc(code);
+async function pack(j){
+  if(!window.CompressionStream)return j;
+  try{const buf=new Uint8Array(await new Response(new Blob([j]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());
+    let bin='';for(let i=0;i<buf.length;i+=32768)bin+=String.fromCharCode.apply(null,buf.subarray(i,i+32768));return'gz:'+btoa(bin)}catch(e){return j}
+}
+async function plain(r){
+  if(!r||typeof r.data!=='string'||!r.data.startsWith('gz:'))return r;
+  if(!window.DecompressionStream)throw bad('ongeldig');
+  const bin=atob(r.data.slice(3)),u=Uint8Array.from(bin,c=>c.charCodeAt(0));
+  return Object.assign({},r,{data:await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text()});
+}
 function withTimeout(p,ms=15000){return Promise.race([p,new Promise((_,no)=>setTimeout(()=>no({code:'timeout'}),ms))])}
-const errKind=e=>e&&e.code==='permission-denied'?'rules':true;
+const errKind=e=>e&&e.user?'invalid':e&&e.code==='permission-denied'?'rules':true;
 function noteChange(){
   if(!cloudOn())return;
   const h=hash(dataJson());if(h===M.pushed)return;
@@ -313,7 +332,7 @@ async function push(){
   if(!cloudOn()||!M.dirty||syncBusy)return;
   if(navigator.onLine===false){syncErr=true;renderChip();return}
   syncBusy=true;renderChip();
-  try{const db=await withTimeout(getDb()),j=dataJson();await withTimeout(docRef(db,M.code).set({data:j,updatedAt:M.modified||Date.now(),v:1}));
+  try{const db=await withTimeout(getDb()),j=dataJson();await withTimeout(docRef(db,M.code).set({data:await pack(j),updatedAt:M.modified||Date.now(),v:1}));
     M.pushed=hash(j);M.dirty=hash(dataJson())!==M.pushed;M.synced=Date.now();saveMeta();syncErr=false}
   catch(e){syncErr=errKind(e)}
   syncBusy=false;renderChip();if(M.dirty&&!syncErr){clearTimeout(pushT);pushT=setTimeout(push,1500)}
@@ -324,7 +343,7 @@ async function pull(){
   syncBusy=true;renderChip();
   try{const db=await withTimeout(getDb()),snap=await withTimeout(docRef(db,M.code).get());syncErr=false;syncBusy=false;
     if(!snap.exists){M.dirty=true;saveMeta();push();return}
-    const r=snap.data(),rh=hash(r.data);
+    const r=await plain(snap.data()),rh=hash(r.data);
     if(rh===hash(dataJson())){M.pushed=rh;M.dirty=false;M.synced=Date.now();saveMeta()}
     else if((r.updatedAt||0)>(M.modified||0)&&!M.dirty){applyRemote(r)}
     else if((r.updatedAt||0)>(M.modified||0)){if(applyRemote(r))toast('Nieuwere gegevens uit de cloud geladen.')}
@@ -351,7 +370,7 @@ async function cloudCheck(){
   if(/[01OI]/.test(code)){toast('Een code bevat nooit 0, 1, O of I. Controleer de tekens nog eens.');return}
   try{const db=await withTimeout(getDb()),snap=await withTimeout(docRef(db,code).get());
     if(!snap.exists){toast('Geen gegevens gevonden bij deze code.');return}
-    const r=snap.data();let d;try{d=remoteData(r)}catch(e){toast('De gegevens bij deze code zijn ongeldig en worden niet geladen.');return}
+    const r=await plain(snap.data());let d;try{d=remoteData(r)}catch(e){toast('De gegevens bij deze code zijn ongeldig en worden niet geladen.');return}
     cloudPending={code,r,summary:`Gevonden: ${(d.sessions||[]).length} trainingen en ${(d.weights||[]).length} gewichtsmetingen.`};confirmKey='cloud';render();
   }catch(e){toast(e&&e.code==='permission-denied'?'Geen toegang. Controleer de Firestore-regels.':'De cloud is niet bereikbaar. Ben je online?')}
 }
@@ -360,8 +379,9 @@ function cloudOff(){clearTimeout(pushT);M.enabled=false;saveMeta();confirmKey=nu
 async function cloudResume(){
   try{const db=await withTimeout(getDb()),snap=await withTimeout(docRef(db,M.code).get());
     const lj=dataJson();
-    if(!snap.exists||snap.data().data===lj){M.enabled=true;M.dirty=!snap.exists;M.modified=Date.now();saveMeta();render();if(M.dirty)push();else{M.pushed=hash(lj);M.synced=Date.now();saveMeta();render()}toast('Cloud-opslag staat weer aan.');return}
-    const r=snap.data();let d;try{d=remoteData(r)}catch(e){toast('De gegevens in de cloud zijn ongeldig. Kies "Deze telefoon gebruiken" om ze te vervangen.');d=null}
+    const r=snap.exists?await plain(snap.data()):null;
+    if(!r||r.data===lj){M.enabled=true;M.dirty=!r;M.modified=Date.now();saveMeta();render();if(M.dirty)push();else{M.pushed=hash(lj);M.synced=Date.now();saveMeta();render()}toast('Cloud-opslag staat weer aan.');return}
+    let d;try{d=remoteData(r)}catch(e){toast('De gegevens in de cloud zijn ongeldig. Kies "Deze telefoon gebruiken" om ze te vervangen.');d=null}
     cloudPending={code:M.code,r,resume:true,summary:`In de cloud: ${d?d.sessions.length:'?'} trainingen. Op deze telefoon: ${S.sessions.length} trainingen.`,valid:!!d};confirmKey='cloud-resume';render();
   }catch(e){toast(errKind(e)==='rules'?'Geen toegang. Controleer de Firestore-regels.':'De cloud is niet bereikbaar. Ben je online?')}
 }
@@ -413,7 +433,7 @@ function renderChip(){
   else{chip.className='chip late';chip.textContent=d===null?'Geen back-up':`Back-up ${d}d geleden`}
 }
 window.addEventListener('online',()=>{if(cloudOn()){syncErr=false;M.dirty?push():pull()}});
-function def(){return{v:1,settings:{bw:null,maxBar:50,maxDb:15,barInc:2.5,dbInc:2,sex:'m',age:null,height:null,act:1.55,sound:true},sessions:[],draft:null,protein:{},weights:[],lastBackup:null,swaps:{},extra:{},deload:{until:null,lastEnd:null,snooze:null}}}
+function def(){return{v:1,settings:{bw:null,maxBar:50,maxDb:15,barInc:2.5,dbInc:2,sex:'m',age:null,height:null,act:1.55,sound:true},sessions:[],draft:null,protein:{},weights:[],lastBackup:null,swaps:{},extra:{},myFoods:[],deload:{until:null,lastEnd:null,snooze:null}}}
 function normalize(d){const b=def();return Object.assign(b,d,{settings:Object.assign(b.settings,d.settings||{}),swaps:Object.assign({},d.swaps||{}),extra:Object.assign({},d.extra||{}),deload:Object.assign(b.deload,d.deload||{})})}
 function load(){try{const raw=localStorage.getItem(KEY);if(raw)return normalize(JSON.parse(raw))}catch(e){}return def()}
 function save(){
@@ -435,6 +455,9 @@ function daysSince(ts){return ts?Math.floor((Date.now()-ts)/864e5):null}
 function hasData(){return S.sessions.length||S.weights.length||Object.keys(S.protein).length}
 function restTxt(s){return s>=120?(s%60?fmt(s/60):s/60)+' min':s+' s'}
 function isWeighted(id){const k=EX[id].kind;return k==='bar'||k==='db'}
+function hasLoad(id){return !!EX[id].load}
+function usesW(id){return isWeighted(id)||hasLoad(id)}
+function isLight(){return isDeload()||!!S.easy}
 
 function isDeload(){return !!(S.deload.until&&todayKey()<=S.deload.until)}
 function deloadDue(){
@@ -450,18 +473,19 @@ function lastSets(id,skipId){
   for(let i=S.sessions.length-1;i>=0;i--){const s=S.sessions[i];if(s.deload||s.id===skipId)continue;const e=s.entries.find(x=>x.ex===id);if(e&&e.sets.length)return e.sets}
   return null;
 }
-function score(id,sets){if(isWeighted(id))return Math.max(...sets.map(s=>(+s.w||0)*(1+(+s.r||0)/30)));return Math.max(...sets.map(s=>+s.r||0))}
+function score(id,sets){if(hasLoad(id)&&S.settings.bw)return Math.max(...sets.map(s=>(S.settings.bw+(+s.w||0))*(1+(+s.r||0)/30)));if(isWeighted(id))return Math.max(...sets.map(s=>(+s.w||0)*(1+(+s.r||0)/30)));return Math.max(...sets.map(s=>+s.r||0))}
 function roundTo(v,inc){return Math.max(inc,Math.round(v/inc)*inc)}
 function suggest(id){
   const e=EX[id],L=lastSets(id),unit=e.kind==='time'?' s':'',wt=isWeighted(id);
   const inc=e.kind==='bar'?S.settings.barInc:S.settings.dbInc,cap=e.kind==='bar'?S.settings.maxBar:S.settings.maxDb;
-  if(isDeload()){
-    if(!L)return{w:'',r:e.min,sets:2,text:'Rustweek: 2 rustige sets, niet tot het uiterste.'};
+  if(isLight()){
+    const RW=isDeload()?'Rustweek':'Opstarttraining';
+    if(!L)return{w:'',r:e.min,sets:2,text:RW+': 2 rustige sets, niet tot het uiterste.'};
     const r0=Math.min(...L.map(s=>+s.r||0));
-    if(!wt)return{w:'',r:r0,sets:2,text:'Rustweek: 2 sets. Stop ruim voordat het zwaar wordt.'};
+    if(!wt)return{w:'',r:r0,sets:2,text:RW+(hasLoad(id)&&+L[0].w>0?': 2 sets zonder extra gewicht.':': 2 sets. Stop ruim voordat het zwaar wordt.')};
     const cw=+L[0].w||0;let w=Math.floor((cw*0.9+1e-9)/inc)*inc;if(w>=cw)w=cw-inc;w=Math.round(w*100)/100;
-    if(w<inc){const r=Math.max(1,Math.round(r0*0.8));return{w:cw,r,sets:2,text:`Rustweek: 2 sets met hetzelfde gewicht (${fmt(cw)} kg), maar ongeveer 20% minder herhalingen: ${r} per set.`}}
-    return{w,r:r0,sets:2,text:`Rustweek: 2 sets, lichter (${fmt(w)} kg in plaats van ${fmt(cw)} kg). Stop ruim voordat het zwaar wordt.`};
+    if(w<inc){const r=Math.max(1,Math.round(r0*0.8));return{w:cw,r,sets:2,text:`${RW}: 2 sets met hetzelfde gewicht (${fmt(cw)} kg), maar ongeveer 20% minder herhalingen: ${r} per set.`}}
+    return{w,r:r0,sets:2,text:`${RW}: 2 sets, lichter (${fmt(w)} kg in plaats van ${fmt(cw)} kg). Stop ruim voordat het zwaar wordt.`};
   }
   if(wt){
     if(!L)return{w:'',r:e.min,sets:e.sets,text:`Eerste keer: kies een gewicht waarmee je ${e.min}–${e.max} herhalingen haalt en er nog 1–2 over hebt.`};
@@ -474,13 +498,20 @@ function suggest(id){
   }
   if(!L)return{w:'',r:e.min,sets:e.sets,text:e.kind==='time'?`Houd ${e.min}–${e.max} seconden vol met goede houding.`:`Zoveel mogelijk nette herhalingen, stop met 1–2 over. Doel: ${e.min}–${e.max}.`};
   const low=Math.min(...L.map(s=>+s.r||0)),step=e.kind==='time'?5:1;
+  if(hasLoad(id)){const ew=+L[0].w||0,top=L.length>=e.sets&&L.every(s=>+s.r>=e.max);
+    if(top){const nw=Math.round((ew+S.settings.dbInc)*100)/100;
+      return{w:ew||'',r:e.max,sets:e.sets,up:{w:nw,r:e.min},text:ew?`Alle sets op ${e.max} met ${fmt(ew)} kg extra. Voorstel: ${fmt(nw)} kg extra en weer beginnen op ${e.min}.`:`Alle sets op ${e.max} gehaald. Voorstel: ${fmt(nw)} kg extra, bijvoorbeeld een rugzak met gewicht, en weer beginnen op ${e.min}.`}}
+    const r=Math.min(e.max,low+1);
+    return{w:ew||'',r,sets:e.sets,text:ew?`Zelfde extra gewicht (${fmt(ew)} kg). Probeer ${r} herhalingen in elke set.`:`Vorige keer minimaal ${low}. Doel: ${r} in elke set.`};
+  }
   if(L.length>=e.sets&&L.every(s=>+s.r>=e.max))return{w:'',r:e.max,sets:e.sets,text:e.kind==='time'?'Doel gehaald. Maak het zwaarder: til één voet op of zet je ellebogen verder naar voren.':'Doel gehaald. Maak het zwaarder: rugzak met gewicht of 3 tellen zakken.'};
   const r=Math.min(e.max,low+step);
   return{w:'',r,sets:e.sets,text:`Vorige keer minimaal ${low}${unit}. Doel: ${r}${unit} in elke set.`};
 }
 function setsText(id,sets){if(!sets||!sets.length)return'';
   if(isWeighted(id)){const ws=[...new Set(sets.map(s=>fmt(+s.w||0)))];return sets.map(s=>s.r).join(' / ')+' × '+ws.join('/')+' kg'}
-  return sets.map(s=>s.r).join(' / ')+(EX[id].kind==='time'?' s':' herh.')}
+  const xw=hasLoad(id)?Math.max(...sets.map(s=>+s.w||0)):0;
+  return sets.map(s=>s.r).join(' / ')+(EX[id].kind==='time'?' s':' herh.')+(xw>0?' · +'+fmt(xw)+' kg':'')}
 function buildSlots(w){const orig=WO[w].ex,used=new Set();
   const sl=orig.map(o=>{const c=S.swaps[o];let cur=o;if(c&&c!==o&&EX[c]&&!orig.includes(c)&&!used.has(c))cur=c;used.add(cur);return{orig:o,cur}});
   ((S.extra||{})[w]||[]).forEach(x=>{if(EX[x]&&!used.has(x)&&!orig.includes(x)){used.add(x);sl.push({orig:x,cur:x,extra:true})}});
@@ -499,6 +530,11 @@ function backupBanner(){
   if(cloudOn()||!S.sessions.length||(d!==null&&d<7))return'';
   return`<div class="banner"><div><strong>${d===null?'Nog geen back-up':'Laatste back-up '+d+' dagen geleden'}</strong><div class="small">Maak er een, dan ben je je trainingen niet kwijt als je browsergegevens wist.</div></div><button type="button" class="primary" data-act="backup">Back-up maken</button></div>`;
 }
+function pauseCard(){
+  const l=S.sessions[S.sessions.length-1];if(!l||S.draft||isDeload()||S.easy||S.gapAck===l.id)return'';
+  const gap=Math.round((new Date(todayKey()+'T12:00:00')-new Date(l.date+'T12:00:00'))/864e5);if(gap<10)return'';
+  return`<section class="card deload"><span class="label">Welkom terug</span><h3>Je hebt ${gap} dagen niet getraind</h3><p class="small">Na een pauze is het verstandig één training iets lichter te doen: 2 sets en ongeveer 10% minder gewicht. Die training telt niet mee voor je opbouw, dus daarna ga je verder waar je gebleven was.</p><div class="row"><button type="button" class="primary" data-act="easy-yes">Rustig opstarten</button><button type="button" data-act="easy-no">Gewoon doorgaan</button></div></section>`;
+}
 function deloadCard(){
   if(isDeload())return`<section class="card deload"><div class="row between"><div><span class="label">Rustweek</span><h3>Tot en met ${dnice(S.deload.until)}</h3></div><button type="button" class="ghost" data-act="deload-stop">Stoppen</button></div><p class="small">Deze week train je met 2 sets en ongeveer 10% minder gewicht. Zo herstellen je spieren en gewrichten, en ga je daarna sterker verder. Rustweektrainingen tellen niet mee voor je records.</p></section>`;
   if(deloadDue())return`<section class="card deload"><span class="label">Voorstel</span><h3>Tijd voor een rustweek</h3><p class="small">Je traint al 6 weken of langer zonder rustweek. Een week lichter trainen helpt om daarna weer vooruit te gaan.</p><div class="row"><button type="button" class="primary" data-act="deload-start">Start rustweek</button><button type="button" data-act="deload-snooze">Nog een week door</button></div></section>`;
@@ -511,16 +547,16 @@ function checklist(list,key,title,sub){
 }
 function vTrain(){
   if(S.draft)return vSession();
-  const w=pickWo||nextWo(),W=WO[w],n=thisWeekCount(),dl=isDeload();
+  const w=pickWo||nextWo(),W=WO[w],n=thisWeekCount(),dl=isLight();
   const list=planIds(w).map((id,ix)=>{const e=EX[id],sg=suggest(id),sw=ix<W.ex.length&&id!==W.ex[ix],xt=ix>=W.ex.length;
-    const tgt=`${sg.sets} × ${e.min}–${e.max}${e.kind==='time'?' s':''}${isWeighted(id)&&sg.w!==''?' · '+fmt(sg.w)+' kg'+(sg.up?' ↑':''):''}`;
+    const tgt=`${sg.sets} × ${e.min}–${e.max}${e.kind==='time'?' s':''}${usesW(id)&&sg.w!==''?' · '+(hasLoad(id)?'+':'')+fmt(sg.w)+' kg'+(sg.up?' ↑':''):hasLoad(id)&&sg.up?' ↑':''}`;
     return`<li><span class="t">${esc(e.name)}${e.side?' <span class="muted small">per kant</span>':''}${sw?' <span class="tag">gewisseld</span>':''}${xt?' <span class="tag">toegevoegd</span>':''}</span><span class="s num">${tgt}</span></li>`}).join('');
-  return`${backupBanner()}${deloadCard()}
+  return`${backupBanner()}${deloadCard()}${pauseCard()}
   <section class="card">
     <div class="row" style="gap:16px;flex-wrap:nowrap">
       <div class="plate ${w}" aria-hidden="true">${w}</div>
       <div class="stack" style="gap:4px">
-        <span class="label">${w===nextWo()?'Volgende training':'Gekozen training'}${dl?' · rustweek':''}</span>
+        <span class="label">${w===nextWo()?'Volgende training':'Gekozen training'}${isDeload()?' · rustweek':S.easy?' · opstarttraining':''}</span>
         <h2>Training ${w}</h2>
         <span class="muted">${W.focus} · ± ${dl?30:planIds(w).length>6?50:45} min</span>
       </div>
@@ -567,10 +603,10 @@ function addPicker(){
 function vSession(){
   const D=S.draft,ed=!!D.editId;
   const cards=D.slots.map((sl,ix)=>{const id=sl.cur,e=EX[id],sg=suggest(id),L=lastSets(id,D.editId),rows=D.entries[id]||[];
-    const wt=isWeighted(id),tm=e.kind==='time';
+    const wt=usesW(id),tm=e.kind==='time',xl=hasLoad(id);
     const sets=rows.map((s,i)=>`<div class="set ${wt?'':tm?'tm':'bw'} ${s.done?'done':''}">
       <span class="n">${i+1}</span>
-      ${wt?`<span class="unit"><input id="w-${id}-${i}" inputmode="decimal" aria-label="Gewicht set ${i+1}" data-f="w" data-ex="${id}" data-i="${i}" value="${s.w}"><em>kg</em></span><span class="x">×</span>`:''}
+      ${wt?`<span class="unit"><input id="w-${id}-${i}" inputmode="decimal" aria-label="${xl?'Extra gewicht':'Gewicht'} set ${i+1}" data-f="w" data-ex="${id}" data-i="${i}" value="${s.w}"${xl?' placeholder="0"':''}><em>${xl?'+kg':'kg'}</em></span><span class="x">×</span>`:''}
       <span class="unit"><input id="r-${id}-${i}" inputmode="numeric" aria-label="${tm?'Seconden':'Herhalingen'} set ${i+1}" data-f="r" data-ex="${id}" data-i="${i}" value="${s.r}"><em>${tm?'s':'x'}</em></span>
       ${tm?`<button type="button" class="tick go" data-act="hold" data-ex="${id}" data-i="${i}" aria-label="Start timer set ${i+1}">▶</button>`:''}
       <button type="button" class="tick" data-act="tick" data-ex="${id}" data-i="${i}" aria-pressed="${!!s.done}" aria-label="Set ${i+1} klaar">✓</button>
@@ -589,7 +625,7 @@ function vSession(){
       </div>
     </section>`}).join('');
   const all=Object.values(D.entries).flat(),done=all.filter(s=>s.done).length;
-  return`<section class="row between"><div><span class="label">${ed?'Bewerken · '+dnice(D.date):'Bezig'}${D.deload?' · rustweek':''}</span><h2>Training ${D.workout}</h2></div><span class="num muted">${done}/${all.length} sets</span></section>
+  return`<section class="row between"><div><span class="label">${ed?'Bewerken · '+dnice(D.date):'Bezig'}${D.deload?(D.easy?' · opstarttraining':' · rustweek'):''}</span><h2>Training ${D.workout}</h2></div><span class="num muted">${done}/${all.length} sets</span></section>
   ${ed?'<p class="small muted">Pas gewichten en herhalingen aan. Vink een set uit om hem te verwijderen.</p>':checklist(WARM,'warm','Warming-up','Ongeveer 5 minuten. Zo worden je spieren en gewrichten warm voor de eerste zware set.')}
   ${cards}
   ${ed?'':addPicker()}
@@ -611,7 +647,8 @@ function chartSVG(pts,unit){
   let g='';for(let v=mn;v<=mx+1e-9;v+=st){g+=`<line class="gl" x1="${pl}" x2="${W-pr}" y1="${Y(v)}" y2="${Y(v)}"/><text class="ax" x="${pl-8}" y="${Y(v)+4}" text-anchor="end">${fmt(v)}</text>`}
   const d=pts.map((p,i)=>(i?'L':'M')+X(i).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' ');
   const area=d+` L${X(pts.length-1)} ${H-pb} L${pl} ${H-pb} Z`;
-  const lab=[0,pts.length-1].map(i=>`<text class="ax" x="${X(i)}" y="${H-8}" text-anchor="${i?'end':'start'}">${esc(pts[i].x)}</text>`).join('');
+  const n=pts.length,li=n<=4?[...Array(n).keys()]:[0,Math.round((n-1)/3),Math.round(2*(n-1)/3),n-1];
+  const lab=li.map((i,j)=>`<text class="ax" x="${X(i)}" y="${H-8}" text-anchor="${j===0?'start':j===li.length-1?'end':'middle'}">${esc(pts[i].x)}</text>`).join('');
   const dots=pts.map((p,i)=>`<circle class="pt ${i===pts.length-1?'last':''}" cx="${X(i)}" cy="${Y(p.y)}" r="${i===pts.length-1?5.5:4}"/>`).join('');
   const bw=(W-pl-pr)/(pts.length-1);
   const hits=pts.map((p,i)=>`<rect class="hit" x="${X(i)-bw/2}" y="0" width="${bw}" height="${H}" data-tip="${esc(p.x)}: ${fmt(p.y)}${unit}" data-cx="${X(i)/W}" data-cy="${Y(p.y)/H}"/>`).join('');
@@ -619,16 +656,16 @@ function chartSVG(pts,unit){
 }
 function vProgress(){
   const used=[...new Set(S.sessions.flatMap(s=>s.entries.map(e=>e.ex)))];
-  if(!chartEx||!used.includes(chartEx))chartEx=used[0]||null;
+  if(!chartEx||!used.includes(chartEx)){const cnt={};S.sessions.forEach(s=>{if(!s.deload)s.entries.forEach(e=>{if(e.sets.length)cnt[e.ex]=(cnt[e.ex]||0)+1})});chartEx=used.slice().sort((a,b)=>(cnt[b]||0)-(cnt[a]||0))[0]||null}
   const now=new Date(),mStart=new Date(now.getFullYear(),now.getMonth(),1).getTime();
   const month=S.sessions.filter(s=>s.ts>=mStart).length;
   let chart='<div class="empty">Sla je eerste training op om hier je vooruitgang te zien.</div>',cap='';
   if(chartEx){const e=EX[chartEx];const pts=S.sessions.filter(s=>!s.deload&&s.entries.some(x=>x.ex===chartEx&&x.sets.length)).map(s=>({x:dnice(s.date),y:score(chartEx,s.entries.find(x=>x.ex===chartEx).sets)}));
-    const wt=isWeighted(chartEx);cap=wt?'Geschat maximum voor 1 herhaling (kg), berekend uit je beste set. Rustweken tellen niet mee.':e.kind==='time'?'Langste set (seconden).':'Meeste herhalingen in één set.';
+    const lo=hasLoad(chartEx)&&!!S.settings.bw,wt=isWeighted(chartEx)||lo;cap=lo?'Geschat maximum voor 1 herhaling, inclusief je lichaamsgewicht en extra gewicht (kg).':wt?'Geschat maximum voor 1 herhaling (kg), berekend uit je beste set. Rustweken tellen niet mee.':e.kind==='time'?'Langste set (seconden).':'Meeste herhalingen in één set.';
     chart=chartSVG(pts,wt?' kg':e.kind==='time'?' s':' herh.')}
   const bwPts=S.weights.slice(-30).map(w=>({x:dnice(w.date),y:w.kg}));
   const hist=S.sessions.slice().reverse().slice(0,30).map(s=>`<li>
-    <div class="row between"><b>${dnice(s.date)} · Training ${s.workout}${s.deload?' <span class="tag">rustweek</span>':''}</b>${confirmKey==='del-'+s.id?`<span class="row"><button type="button" class="danger" data-act="del-yes" data-id="${s.id}">Verwijder</button><button type="button" data-act="cancel">Nee</button></span>`:`<span class="row" style="gap:0"><button type="button" class="ghost" data-act="edit" data-id="${s.id}">Bewerk</button><button type="button" class="ghost" data-act="del" data-id="${s.id}">Verwijder</button></span>`}</div>
+    <div class="row between"><b>${dnice(s.date)} · Training ${s.workout}${s.deload?` <span class="tag">${s.easy?'opstart':'rustweek'}</span>`:''}</b>${confirmKey==='del-'+s.id?`<span class="row"><button type="button" class="danger" data-act="del-yes" data-id="${s.id}">Verwijder</button><button type="button" data-act="cancel">Nee</button></span>`:`<span class="row" style="gap:0"><button type="button" class="ghost" data-act="edit" data-id="${s.id}">Bewerk</button><button type="button" class="ghost" data-act="del" data-id="${s.id}">Verwijder</button></span>`}</div>
     <span class="small muted">${s.entries.map(e=>esc(EX[e.ex].name)+' '+esc(setsText(e.ex,e.sets))).join(' · ')}</span></li>`).join('');
   return`${backupBanner()}
   <div class="stats">
@@ -661,6 +698,7 @@ function vFood(){
       <div class="stack" style="gap:6px"><span class="label">Eiwit</span><div><span class="big">${sum}</span><span class="muted">${T?' / '+T.t:''} g</span></div>${T?`<div class="meter ${sum>=T.t?'full':''}"><i style="width:${Math.min(100,sum/T.t*100)}%"></i></div><span class="small muted num">doel ${T.lo}–${T.hi} g</span>`:''}</div>
       <div class="stack" style="gap:6px"><span class="label">Calorieën</span><div><span class="big">${kc}</span><span class="muted">${K?' / '+K:''} kcal</span></div>${K?`<div class="meter kcal ${kc>K*1.05?'over':''}"><i style="width:${Math.min(100,kc/K*100)}%"></i></div><span class="small muted">onderhoud, schatting</span>`:`<button type="button" class="ghost small inline" data-act="gomore">Behoefte uitrekenen</button>`}</div>
     </div>
+    ${(S.myFoods||[]).length?`<span class="label">Eigen producten</span><div class="quick">${S.myFoods.map((f,i)=>`<span class="myf"><button type="button" data-act="myfood" data-i="${i}">${esc(f.l)} <b>${f.g} g</b> <span class="muted">${f.k||''}</span></button><button type="button" class="x" data-act="myfood-del" data-i="${i}" aria-label="Verwijder ${esc(f.l)} uit eigen producten">×</button></span>`).join('')}</div>`:''}
     <span class="label">Snel toevoegen</span>
     <div class="quick">${FOODS.map((f,i)=>`<button type="button" data-act="food" data-i="${i}">${esc(f[0])} <b>${f[1]} g</b> <span class="muted">${f[2]}</span></button>`).join('')}</div>
     <div class="custom"><input id="fName" placeholder="Iets anders" aria-label="Omschrijving"><input id="fG" inputmode="numeric" placeholder="g eiwit" aria-label="Gram eiwit"><input id="fK" inputmode="numeric" placeholder="kcal" aria-label="Kilocalorieën"><button type="button" data-act="foodc" aria-label="Toevoegen">+</button></div>
@@ -832,7 +870,8 @@ function validData(d){
   if(d.protein!==undefined&&!(isObj(d.protein)&&Object.entries(d.protein).every(([k,v])=>isDate(k)&&Array.isArray(v)&&v.every(it=>isObj(it)&&isNum(it.g)))))throw bad('De voedingsgegevens in dit bestand zijn ongeldig.');
   const sw={};if(isObj(d.swaps))Object.entries(d.swaps).forEach(([o,n])=>{if(EX[o]&&EX[n])sw[o]=n});
   const ext={};if(isObj(d.extra))Object.entries(d.extra).forEach(([w,l])=>{if(WO[w]&&Array.isArray(l))ext[w]=l.filter(x=>EX[x])});
-  const n=normalize(Object.assign({},d,{swaps:sw,extra:ext,draft:null}));
+  const mf=Array.isArray(d.myFoods)?d.myFoods.filter(f=>isObj(f)&&typeof f.l==='string'&&isNum(f.g)).slice(0,8):[];
+  const n=normalize(Object.assign({},d,{swaps:sw,extra:ext,myFoods:mf,draft:null}));
   if(!isObj(n.deload))n.deload=def().deload;
   return n;
 }
@@ -848,12 +887,13 @@ async function checkRestore(){
 }
 function finishDraft(){
   const D=S.draft,entries=[];
-  D.slots.forEach(sl=>{const sets=(D.entries[sl.cur]||[]).filter(s=>s.done).map(s=>({w:isWeighted(sl.cur)?(num(s.w)??''):'',r:num(s.r)||0}));if(sets.length)entries.push({ex:sl.cur,sets})});
+  D.slots.forEach(sl=>{const sets=(D.entries[sl.cur]||[]).filter(s=>s.done).map(s=>({w:usesW(sl.cur)?(num(s.w)??''):'',r:num(s.r)||0}));if(sets.length)entries.push({ex:sl.cur,sets})});
   if(!entries.length){toast('Vink eerst de sets aan die je hebt gedaan.');return}
   if(D.editId){const s=S.sessions.find(x=>x.id===D.editId);if(s)s.entries=entries
     S.draft=null;save();stopTimer();tab='progress';render();window.scrollTo(0,0);toast('Training bijgewerkt.');return}
-  const prs=D.deload?[]:entries.filter(en=>{if(!isWeighted(en.ex))return false;const prev=S.sessions.filter(s=>!s.deload).flatMap(s=>s.entries.filter(x=>x.ex===en.ex).map(x=>score(en.ex,x.sets)));return prev.length&&score(en.ex,en.sets)>Math.max(...prev)}).map(en=>EX[en.ex].name);
-  S.sessions.push({id:Date.now().toString(36),ts:Date.now(),date:D.date,workout:D.workout,entries,deload:!!D.deload});
+  const topW=sets=>Math.max(...sets.map(x=>+x.w||0));
+  const prs=D.deload?[]:entries.filter(en=>{if(!usesW(en.ex)||!(topW(en.sets)>0))return false;const prev=S.sessions.filter(s=>!s.deload).flatMap(s=>s.entries.filter(x=>x.ex===en.ex&&x.sets.length).map(x=>topW(x.sets)));return prev.length&&topW(en.sets)>Math.max(...prev)}).map(en=>`${EX[en.ex].name} (${hasLoad(en.ex)?'+':''}${fmt(topW(en.sets))} kg)`);
+  S.sessions.push(Object.assign({id:Date.now().toString(36),ts:Date.now(),date:D.date,workout:D.workout,entries,deload:!!D.deload},D.easy?{easy:true}:{}));if(D.easy)S.easy=false;
   S.draft=null;save();stopTimer();tab='train';render();window.scrollTo(0,0);
   toast(prs.length?'Opgeslagen. Nieuw record: '+prs.join(', '):'Training opgeslagen.');
 }
@@ -869,7 +909,7 @@ document.addEventListener('click',e=>{
   switch(a){
     case'pick':pickWo=b.dataset.w;render();break;
     case'start':{pickOpen=false;const w=b.dataset.w,slots=buildSlots(w),ent={};slots.forEach(sl=>ent[sl.cur]=freshRows(sl.cur));
-      S.draft={workout:w,date:todayKey(),started:Date.now(),slots,entries:ent,warm:{},cool:{},deload:isDeload()};pickWo=null;save();render();window.scrollTo(0,0);break}
+      S.draft={workout:w,date:todayKey(),started:Date.now(),slots,entries:ent,warm:{},cool:{},deload:isLight(),easy:!isDeload()&&!!S.easy};pickWo=null;save();render();window.scrollTo(0,0);break}
     case'tick':{const s=S.draft.entries[id][i];s.done=!s.done;save();render();if(s.done&&!S.draft.editId)afterSet(id);break}
     case'hold':{const s=S.draft.entries[id][i],sec=num(s.r)||EX[id].min,lb='Vasthouden · '+EX[id].name+' · set '+(i+1);runSeq(EX[id].side?sideSteps(sec,lb):[[sec,lb]],()=>{if(!S.draft||!S.draft.entries[id]||!S.draft.entries[id][i])return;S.draft.entries[id][i].done=true;save();render();afterSet(id)});break}
     case'chk':{const k=b.dataset.k,st=S.draft[k]=S.draft[k]||{};st[i]=!st[i];save();render();break}
@@ -890,6 +930,10 @@ document.addEventListener('click',e=>{
     case'unswap':delete S.swaps[b.dataset.o];save();render();break;
     case'finish':finishDraft();break;
     case'discard':confirmKey='discard';render();break;
+    case'easy-yes':{const l=S.sessions[S.sessions.length-1];S.easy=true;S.gapAck=l&&l.id;save();render();break}
+    case'easy-no':{const l=S.sessions[S.sessions.length-1];S.gapAck=l&&l.id;save();render();break}
+    case'myfood':{const f=S.myFoods[i];if(!f)break;const k=todayKey();(S.protein[k]=S.protein[k]||[]).push({l:f.l,g:f.g,k:f.k});save();render();break}
+    case'myfood-del':S.myFoods.splice(i,1);save();render();break;
     case'sug-yes':{const sg=suggest(id),D=S.draft;(D.sug=D.sug||{})[id]='yes';D.entries[id].forEach(r=>{if(!r.done){r.w=sg.up.w;r.r=sg.up.r}});save();render();break}
     case'sug-no':{(S.draft.sug=S.draft.sug||{})[id]='no';save();render();break}
     case'sound':S.settings.sound=!S.settings.sound;save();render();if(S.settings.sound){unlockAudio();beep()}break;
@@ -906,7 +950,8 @@ document.addEventListener('click',e=>{
     case'gomore':go('more');break;
     case'food':{const f=FOODS[i],k=todayKey();(S.protein[k]=S.protein[k]||[]).push({l:f[0],g:f[1],k:f[2]});save();render();break}
     case'foodc':{const g=parseInt($('#fG').value,10)||0,kc=parseInt($('#fK').value,10)||0;if(!(g>0||kc>0)){toast('Vul gram eiwit of kcal in.');break}
-      const k=todayKey();(S.protein[k]=S.protein[k]||[]).push({l:$('#fName').value.trim()||'Eigen invoer',g,k:kc});save();render();break}
+      const nm=$('#fName').value.trim(),k=todayKey();(S.protein[k]=S.protein[k]||[]).push({l:nm||'Eigen invoer',g,k:kc});
+      if(nm){S.myFoods=(S.myFoods||[]).filter(f=>f.l.toLowerCase()!==nm.toLowerCase());S.myFoods.unshift({l:nm,g,k:kc});S.myFoods=S.myFoods.slice(0,8)}save();render();break}
     case'fdel':{const k=todayKey();S.protein[k].splice(i,1);if(!S.protein[k].length)delete S.protein[k];save();render();break}
     case'backup':doBackup();break;
     case'download':doDownload();break;
@@ -949,9 +994,10 @@ document.addEventListener('pointerout',e=>{const r=e.target.closest('.hit');if(r
 document.addEventListener('pointerdown',e=>{const r=e.target.closest('.hit');if(r)showTip(r)});
 
 if(S.draft&&!S.draft.slots){const w=S.draft.workout;S.draft.slots=Object.keys(S.draft.entries).map(x=>({orig:x,cur:x}));if(!WO[w])S.draft=null}
+if(compactFood())save();
 render();
 pull();
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&cloudOn())M.dirty?push():pull()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='visible')return;if(compactFood())save();if(cloudOn())M.dirty?push():pull()});
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 })();
 </script>

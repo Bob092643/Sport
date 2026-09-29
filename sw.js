@@ -1,4 +1,4 @@
-const CACHE='krachthuis-v7';
+const CACHE='krachthuis-v10';
 const SHELL=['./','index.html','firebase-config.js','manifest.webmanifest','icon.svg','icon-192.png','icon-512.png','icon-maskable-512.png'];
 const EXT=['https://fonts.googleapis.com','https://fonts.gstatic.com','https://www.gstatic.com'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting()))});
